@@ -1,3 +1,7 @@
+*.elf
+*.objdump
+*.force_relink
+
 # Prerequisites
 *.d
 
