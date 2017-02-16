@@ -40,6 +40,17 @@
 
 #define PICTURE_X_OFFSET 240
 #define PICTURE_Y_OFFSET 120
+
+//BUTTON CONSTANTS
+#define LARROW_X1			50
+#define LARROW_Y1			190
+#define UARROW_X1			350
+#define UARROW_Y1			50
+#define RARROW_X1			750
+#define RARROW_Y1			190
+#define DARROW_X1			350
+#define DARROW_Y1			430
+#define ARROW_LENGTH		100
 /*
  * This function writes a single pixel to the x,y coords specified using the specified colour
  * Note colour is a byte and represents a palette number (0-255) not a 24 bit RGB value

@@ -59,5 +59,8 @@ uint8_t *read_picture(uint8_t n);
 int resume_picture(void);
 read_picture_to_ptr(uint8_t * jpeg_buffer, uint8_t n);
 
+int set_motion_detect(int flag);
+int get_motion_detect(void);
+int motion_detected(unsigned long timeout);
 
 #endif /* CAMERA_H_ */

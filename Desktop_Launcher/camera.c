@@ -27,6 +27,13 @@
 #define COMMAND_READ_FBUF 0x32
 #define COMMAND_GET_FBUF_LEN 0x34
 #define COMMAND_FBUF_CTRL 0x36
+#define MOTION_CTRL 0x42
+#define COMMAND_MOTION_STATUS 0x38
+#define COMMAND_MOTION_CTRL 0x37
+#define CONFIG_MOTION_CONTROL 0x00
+#define CONFIG_UART_MOTION 0x01
+#define CONFIG_ACTIVE_MOTION 0x01
+#define COMMAND_MOTION_DETECTED 0x39
 // Constants
 #define CAMERA_BUFFER_SIZE 100
 #define CAMERADELAY 10
@@ -78,6 +85,17 @@ uint8_t read_response(uint8_t numbytes, uint8_t timeout)
 
     buffer_length = serial_read_timeout(CAMERA, camera_buffer,
                                         numbytes, STD_WAIT);
+//    print_byte_array(camera_buffer, buffer_length);
+    return buffer_length;
+}
+
+uint8_t rekt_read_response(uint8_t numbytes, unsigned long timeout)
+{
+    // Ensure that we don't overrun the global recv buffer.
+    assert(numbytes <= CAMERA_BUFFER_SIZE);
+
+    buffer_length = serial_read_timeout(CAMERA, camera_buffer,
+                                        numbytes, timeout);
 //    print_byte_array(camera_buffer, buffer_length);
     return buffer_length;
 }
@@ -148,6 +166,7 @@ void cam_init(void)
 	frame_ptr = 0;
 
     init_serial(CAMERA);
+    serial_read_timeout(CAMERA, camera_buffer, CAMERA_BUFFER_SIZE +1, STD_WAIT);
     memset(camera_buffer, 0, CAMERA_BUFFER_SIZE +1);
 }
 
@@ -182,6 +201,7 @@ int resume_picture(void)
     frame_ptr = 0;
     return camera_frame_buff_ctrl(COMMAND_RESUMEFRAME);
 }
+
 uint32_t frame_length(void)
 {
 	uint8_t args[] = {0x01, 0x00};
@@ -209,7 +229,45 @@ int camera_reset(void)
   return run_command(COMMAND_RESET, args, 1, 5, 1);
 }
 
+int set_motion_status(uint8_t x, uint8_t d1, uint8_t d2) {
+  uint8_t args[] = {0x03, x, d1, d2};
 
+  return run_command(MOTION_CTRL, args, sizeof(args), 5, 1);
+}
+
+int set_motion_detect(int flag)
+{
+  if (!set_motion_status(CONFIG_MOTION_CONTROL,
+		  CONFIG_UART_MOTION, CONFIG_ACTIVE_MOTION))
+    return 0;
+
+  uint8_t args[] = {0x01, flag};
+
+  return run_command(COMMAND_MOTION_CTRL, args, sizeof(args), 5, 1);
+}
+
+
+int get_motion_detect(void)
+{
+  uint8_t args[] = {0x0};
+
+  if (! run_command(COMMAND_MOTION_STATUS, args, 1, 6, 1))
+    return 0;
+
+  return camera_buffer[5];
+}
+
+
+int motion_detected(unsigned long timeout)
+{
+	if(rekt_read_response(4, 10000000) != 4)
+		return 0;
+
+  if (! verify_response(COMMAND_MOTION_DETECTED))
+    return 0;
+
+  return 1;
+}
 
 uint8_t *read_picture(uint8_t n)
 {
@@ -231,7 +289,7 @@ uint8_t *read_picture(uint8_t n)
     return camera_buffer;
 }
 
-read_picture_to_ptr(uint8_t * jpeg_buffer, uint8_t n)
+int read_picture_to_ptr(uint8_t * jpeg_buffer, uint8_t n)
 {
     uint8_t args[] = {0x0C, 0x0, 0x0A, 0, 0, frame_ptr >> 8, frame_ptr & 0xFF,
             0, 0, 0, n, CAMERADELAY >> 8, CAMERADELAY & 0xFF};
@@ -248,9 +306,29 @@ read_picture_to_ptr(uint8_t * jpeg_buffer, uint8_t n)
         return 0;
 
     frame_ptr += n;
-
+    return 1;
 }
 
+uint32_t read_full_picture(uint8_t * jpeg_buffer)
+{
+	uint32_t ret_size = frame_length();
+    uint32_t remaining_length = ret_size;
+
+	jpeg_buffer = malloc((sizeof(uint8_t)*ret_size) + 10);
+	if (jpeg_buffer == NULL)
+		return 0;
+
+	while (remaining_length > 64)
+	{
+		// read 64 bytes at a time;
+		read_picture_to_ptr(jpeg_buffer, 64);
+		remaining_length -= 64;
+	}
+
+	read_picture_to_ptr(jpeg_buffer, remaining_length);
+
+	return ret_size;
+}
 
 
 

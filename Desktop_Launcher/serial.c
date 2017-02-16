@@ -37,16 +37,6 @@
 volatile unsigned char edge_capture;
 
 //===================================================================
-// ISR Serial Handler
-//===================================================================
-static void handle_serial_interrupts(void* context, alt_u32 id)
-{
-    volatile unsigned char* edge_capture_ptr = (volatile int*) context;
-    (*edge_capture_ptr) = RXDATA(CAMERA);
-}
-
-
-//===================================================================
 // Private Function Definitions
 //===================================================================
 void init_serial(volatile unsigned char* device)
@@ -59,22 +49,6 @@ void init_serial(volatile unsigned char* device)
         BAUD(device) = 0x03;
     else
         BAUD(device) = 0x01;
-}
-
-void enable_device_recv_irq(volatile unsigned char* device)
-{
-    void* edge_capture_ptr = (void*) &edge_capture;
-    // Enable IRQ
-    //unsigned char clear_data = RXDATA(device);
-    CONTROL(device) = 0x95;
-    // Register the ISR
-    alt_irq_register( TO_EXTERNAL_BUS_BRIDGE_0_IRQ, edge_capture_ptr,
-            handle_serial_interrupts );
-}
-
-unsigned char test_irq(void)
-{
-    return edge_capture;
 }
 
 unsigned char serial_putchar(volatile unsigned char* device, char c)
