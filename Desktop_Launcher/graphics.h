@@ -29,6 +29,7 @@ typedef enum button_type
 	automatic,
 	security,
 	fire,
+	photo,
 	left,
 	right,
 	down,
@@ -37,6 +38,7 @@ typedef enum button_type
 	automatic_pressed,
 	security_pressed,
 	fire_pressed,
+	camera_pressed,
 	left_pressed,
 	right_pressed,
 	down_pressed,
@@ -49,4 +51,8 @@ void draw_button(button_type button, int colour);
 void program_palette(int PaletteNumber, uint32_t RGB);
 void clear_screen(void);
 void reticle(int colour);
+void write_processing_message(int message_colour);
+void erase_processing_message(void);
+void print_display(int arrow_colour, int menu_colour, int screen_colour,
+				  int reticle_colour, int fire_colour, int camera_colour);
 #endif /* GRAPHICS_H_ */

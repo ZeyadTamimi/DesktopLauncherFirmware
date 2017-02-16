@@ -266,12 +266,32 @@ void reticle(int colour)
 	rectangle(370,304,430,306,colour);
 }
 
+void write_processing_message(int colour)
+{
+		OutGraphicsCharFont1(346,85,BLACK,colour,'P',0);
+		OutGraphicsCharFont1(358,85,BLACK,colour,'R',0);
+		OutGraphicsCharFont1(370,85,BLACK,colour,'O',0);
+		OutGraphicsCharFont1(382,85,BLACK,colour,'C',0);
+		OutGraphicsCharFont1(394,85,BLACK,colour,'E',0);
+		OutGraphicsCharFont1(406,85,BLACK,colour,'S',0);
+		OutGraphicsCharFont1(418,85,BLACK,colour,'S',0);
+		OutGraphicsCharFont1(430,85,BLACK,colour,'I',0);
+		OutGraphicsCharFont1(442,85,BLACK,colour,'N',0);
+		OutGraphicsCharFont1(454,85,BLACK,colour,'G',0);
+
+
+}
+
+void erase_processing_message(void)
+{
+	rectangle(345,60,460,80,BLACK);
+}
 
 /*
  * Draw set arrow layout with colour
  */
 void print_display(int arrow_colour, int menu_colour, int screen_colour,
-				  int reticle_colour, int fire_colour)
+				  int reticle_colour, int fire_colour, int camera_colour)
 {
 	clear_screen();
 	//rectangle(60,60,740,420,screen_colour);
@@ -279,6 +299,7 @@ void print_display(int arrow_colour, int menu_colour, int screen_colour,
 
 	//MENU ICONS
 	draw_button(fire,fire_colour);
+	draw_button(camera,camera_colour)
 	draw_button(security,menu_colour);
 	draw_button(manual,menu_colour);
 	draw_button(automatic,menu_colour);
@@ -292,13 +313,21 @@ void draw_button(button_type button, int colour){
 	switch(button){
 
 	case(fire):
-		circle(600,450,20,colour);
-		OutGraphicsCharFont1(590,447,BLACK,colour,'F',0);
-		OutGraphicsCharFont1(596,447,BLACK,colour,'I',0);
-		OutGraphicsCharFont1(602,447,BLACK,colour,'R',0);
-		OutGraphicsCharFont1(608,447,BLACK,colour,'E',0);
+		circle(600,440,30,colour);
+		OutGraphicsCharFont1(585,437,BLACK,colour,'F',0);
+		OutGraphicsCharFont1(595,437,BLACK,colour,'I',0);
+		OutGraphicsCharFont1(605,437,BLACK,colour,'R',0);
+		OutGraphicsCharFont1(615,437,BLACK,colour,'E',0);
 		break;
 
+	case(camera):
+		circle(200,440,30,colour);
+		rectangle(180,425,220,455,GREY);
+		circle(200,440,10,BLACK);
+		circle(200,440,8,WHITE);
+		rectangle(185,420,195,425,BLACK);
+		circle(215,430,2,RED);
+		break;
 	case(manual):
 		rectangle(500,10,580,50,colour);
 		OutGraphicsCharFont1(520,27,BLACK,colour,'M',0);
