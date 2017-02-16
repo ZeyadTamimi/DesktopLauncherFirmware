@@ -47,8 +47,10 @@ void init_serial(volatile unsigned char* device)
         BAUD(device) = 0x07;
     else if (device == CAMERA)
         BAUD(device) = 0x03;
+    else if (device == WIFI)
+    	BAUD(device) = 0x01; // 115200
     else
-        BAUD(device) = 0x01;
+    	BAUD(device) = 0x01;
 }
 
 unsigned char serial_putchar(volatile unsigned char* device, char c)

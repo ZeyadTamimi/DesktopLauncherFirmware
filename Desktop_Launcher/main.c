@@ -8,6 +8,7 @@
 #include "nano_jpeg.h"
 #include "camera.h"
 #include "graphics.h"
+#include "wifi.h"
 
 #define _NJ_INCLUDE_HEADER_ONLY
 
@@ -17,11 +18,6 @@
 #define USER_POLL 50000
 
 #define DEFAULT_MOTOR_SPEED 2
-#define MAX_BYTES 128
-
-#define SEND_DATA_SIZE 12
-const char * send_data_command = "send_data";
-
 
 typedef enum desktop_launcher_mode
 {
@@ -33,37 +29,6 @@ typedef enum desktop_launcher_mode
 volatile desktop_launcher_mode current_mode;
 volatile desktop_launcher_mode past_mode;
 
-
-
-int send_image_to_server(uint8_t *image_data, size_t image_size)
-{
-	// TODO FIX THIS PLS IM DED
-	// Encode the length
-	uint8_t length_image_data[SEND_DATA_SIZE + 4];
-	snprintf(length_image_data, SEND_DATA_SIZE + 4, "%s(%04x)", send_data_command, image_size & 0xFFFF);
-	printf("THE MESSAGE IS: %s",length_image_data);
-	printf("WHY!");
-	return 1;
-
-	// Send the image data encoded in ascii  in MAX_BYTES packets
-	uint8_t string_image_data[MAX_BYTES*2 + SEND_DATA_SIZE];
-	while (image_size > MAX_BYTES)
-	{
-
-	}
-
-
-
-
-	/*int current_character;
-	for (current_character = 0; current_character < image_size; current_character++)
-		string_image_data += sprintf(string_image_data, "%c", image_data[current_character]);
-	string_image_data[image_size] = '\0';
-
-
-
-	free(string_image_data);*/
-}
 
 
 void mode_manual_callback()
@@ -153,6 +118,7 @@ void security_mode(void)
 	if (motion)
 	{
 		// TODO SMS
+		send_sms("Someone is moving around!", 25);
 	}
 
 	int photo = take_picture();
@@ -161,7 +127,7 @@ void security_mode(void)
 		uint32_t photo_size = read_full_picture(&jpeg_photo_buffer);
 		// TODO encode data
 		// TODO send data;
-
+		// send_data(jpeg_photo_buffer, photo_size);
 	}
 
 	process_user_input(SECURITY_POLL);
@@ -199,6 +165,7 @@ void auto_mode(void)
 	if (motion)
 	{
 		// TODO SMS
+		send_sms("Someone is moving around!", 25);
 		// TODO FIRE
 	}
 
@@ -210,6 +177,7 @@ void auto_mode(void)
 		// TODO PRINT TO SCREEN
 		// TODO encode data
 		// TODO send data;
+		// send_data(jpeg_photo_buffer, photo_size);
 	}
 }
 
@@ -226,7 +194,7 @@ void manual_mode(void)
 int main (void)
 {
 	printf("HELLO WORLD!?!?!\n");
-	send_image_to_server(NULL, 100);
+	init_wifi();
 	// Mode Initialization
 	current_mode = MANUAL;
 	past_mode = MANUAL;
@@ -238,12 +206,12 @@ int main (void)
     set_image_resolution(FRAME_320x240);
 	printf(" Image Resolution was %d\n", get_image_resolution());
 
-	// Gui init code
 	init_motors();
 	set_motor_speed(DEFAULT_MOTOR_SPEED);
 //	motor_test();
+//  send_sms("Hello World!", 12);
 
-	// Gui init code
+    // Gui init code
 	init_gui();
 	change_button_callback(LEFT_BUTTON, move_left);
 	change_button_callback(RIGHT_BUTTON, move_right);

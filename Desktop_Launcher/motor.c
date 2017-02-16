@@ -54,7 +54,7 @@ int motor_test()
 		int pwm_counter;
 		printf("enter: ");
 		scanf("%d", &pwm_counter);
-		set_direct_PWM(2, pwm_counter);
+		set_direct_PWM(1, pwm_counter);
 
 	}
 	return 0;
