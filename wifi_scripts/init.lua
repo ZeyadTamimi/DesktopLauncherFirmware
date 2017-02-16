@@ -1,7 +1,9 @@
 -- This information is used by the Wi-Fi dongle to make a wireless connection to the router in the Lab
 -- or if you are using another router e.g. at home, change ID and Password appropriately
-SSID = "M112-PD"
-SSID_PASSWORD = "aiv4aith2Zie4Aeg"
+--SSID = "M112-PD"
+--SSID_PASSWORD = "aiv4aith2Zie4Aeg"
+SSID = "FOB"
+SSID_PASSWORD = "fob4life"
 
 -- this is the LED
 gpio.mode(3, gpio.OUTPUT)
@@ -15,9 +17,37 @@ function flash_led()
 end
 
 -- configure ESP as a station
-wifi.setmode(wifi.STATION)
+wifi.setmode(wifi.STATIONAP)
 wifi.sta.config(SSID,SSID_PASSWORD)
 wifi.sta.autoconnect(1)
+
+-- connect to server
+conn=nil
+conn=net.createConnection(net.TCP,0)
+
+conn:on("connection", function(conn, payload)
+    print('\nConnected')
+end)
+
+conn:on("disconnection",function(conn)
+    print("\nDisconnected")
+end)
+
+conn:on("sent",function(conn)
+    print("\nSent")
+end)
+
+function connect()
+    conn:connect(80,'192.168.43.197')
+end
+
+function send_data(data)
+    conn:send(data)
+end
+
+function close()
+    conn:close()
+end
 
 -- alternatively you could do it this way
 -- wifi.sta.config("M112-PD","aiv4aith2Zie4Aeg", 1)
@@ -66,8 +96,8 @@ function build_post_request(host, uri, data_table)
      "Host: "..host.."\r\n"..
      "Connection: close\r\n"..
      "Content-Type: application/x-www-form-urlencoded\r\n"..
-     "Content-Length: "..string.len(data).."\r\n"..
      "\r\n"..
+     "Content-Length: "..string.len(data).."\r\n"..
      data
      print(request)
      return request
@@ -81,14 +111,14 @@ end
 
 -- When using send_sms: the "from" number HAS to be your twilio number.
 -- If you have a free twilio account the "to" number HAS to be your twilio verified number.
-function send_sms(from,to,body)
+function send_sms(body)
 
      data = {
       sid = TWILIO_ACCOUNT_SID,
       token = TWILIO_TOKEN,
       Body = string.gsub(body," ","+"),
-      From = from,
-      To = to
+      From = "(438) 792-4027",
+      To = "(778) 712-5588"
      }
 
      socket = net.createConnection(net.TCP,0)
@@ -111,7 +141,7 @@ function check_wifi()
   print("Connected to AP!")
   print(ip)
   -- send a text message from, to, text
-  send_sms("(438) 792-4027","(778) 712-5588","Ring-Ring - this is your breadboard calling!!!!")
+  send_sms("Ring-Ring - this is your breadboard calling!!!!")
 
  end
 end
