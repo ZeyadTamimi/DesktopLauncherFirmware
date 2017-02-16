@@ -4,6 +4,7 @@
 #define MIN_MOTOR_SPEED 1
 #define MAX_MOTOR_SPEED 9
 
+int motor_test();
 void init_motors(void);
 void move_up(void);
 void move_down(void);

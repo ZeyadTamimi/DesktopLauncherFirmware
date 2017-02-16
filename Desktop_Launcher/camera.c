@@ -5,6 +5,7 @@
 #include <stdint.h>
 #include <string.h>
 #include <assert.h>
+#include <stdlib.h>
 // project Includes
 #include "serial.h"
 #include "camera.h"
@@ -260,7 +261,7 @@ int get_motion_detect(void)
 
 int motion_detected(unsigned long timeout)
 {
-	if(rekt_read_response(4, 10000000) != 4)
+	if(rekt_read_response(4, timeout) != 4)
 		return 0;
 
   if (! verify_response(COMMAND_MOTION_DETECTED))
@@ -309,23 +310,25 @@ int read_picture_to_ptr(uint8_t * jpeg_buffer, uint8_t n)
     return 1;
 }
 
-uint32_t read_full_picture(uint8_t * jpeg_buffer)
+uint32_t read_full_picture(uint8_t ** jpeg_buffer)
 {
 	uint32_t ret_size = frame_length();
     uint32_t remaining_length = ret_size;
 
-	jpeg_buffer = malloc((sizeof(uint8_t)*ret_size) + 10);
-	if (jpeg_buffer == NULL)
+	*jpeg_buffer = malloc((sizeof(uint8_t)*ret_size) + 10);
+	if (*jpeg_buffer == NULL)
 		return 0;
 
 	while (remaining_length > 64)
 	{
 		// read 64 bytes at a time;
-		read_picture_to_ptr(jpeg_buffer, 64);
+		if (!read_picture_to_ptr(*jpeg_buffer, 64))
+			printf("ERROR!\n");
 		remaining_length -= 64;
 	}
 
-	read_picture_to_ptr(jpeg_buffer, remaining_length);
+	read_picture_to_ptr(*jpeg_buffer, remaining_length);
+
 
 	return ret_size;
 }

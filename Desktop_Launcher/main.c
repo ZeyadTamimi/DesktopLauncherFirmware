@@ -1,3 +1,7 @@
+#include <stdio.h>      /* printf, scanf, NULL */
+#include <stdlib.h>
+#include <unistd.h>
+#include <string.h>
 #include "gui.h"
 #include "touch_screen.h"
 #include "motor.h"
@@ -7,133 +11,121 @@
 
 #define _NJ_INCLUDE_HEADER_ONLY
 
-#define SECURITY_POLL 1000000
-#define USER_POLL 1000000
+#define SECURITY_POLL 500000
+#define MANUAL_POLL 100000
+#define AUTO_POLL 100000
+#define USER_POLL 50000
 
+#define DEFAULT_MOTOR_SPEED 2
+#define MAX_BYTES 128
+
+#define SEND_DATA_SIZE 12
+const char * send_data_command = "send_data";
 
 
 typedef enum desktop_launcher_mode
 {
 	MANUAL= 0x00,
-	SECURITY = 0x01
+	AUTO = 0x01,
+	SECURITY = 0x02
 }desktop_launcher_mode;
 
-desktop_launcher_mode current_mode;
-desktop_launcher_mode past_mode;
+volatile desktop_launcher_mode current_mode;
+volatile desktop_launcher_mode past_mode;
 
 
-void manual_callback()
+
+int send_image_to_server(uint8_t *image_data, size_t image_size)
 {
-	desktop_launcher_mode = MANUAL;
+	// TODO FIX THIS PLS IM DED
+	// Encode the length
+	uint8_t length_image_data[SEND_DATA_SIZE + 4];
+	snprintf(length_image_data, SEND_DATA_SIZE + 4, "%s(%04x)", send_data_command, image_size & 0xFFFF);
+	printf("THE MESSAGE IS: %s",length_image_data);
+	printf("WHY!");
+	return 1;
+
+	// Send the image data encoded in ascii  in MAX_BYTES packets
+	uint8_t string_image_data[MAX_BYTES*2 + SEND_DATA_SIZE];
+	while (image_size > MAX_BYTES)
+	{
+
+	}
+
+
+
+
+	/*int current_character;
+	for (current_character = 0; current_character < image_size; current_character++)
+		string_image_data += sprintf(string_image_data, "%c", image_data[current_character]);
+	string_image_data[image_size] = '\0';
+
+
+
+	free(string_image_data);*/
 }
 
 
-void security_callback()
+void mode_manual_callback()
 {
-	desktop_launcher_mode = SECURITY;
+	past_mode = current_mode;
+	current_mode = MANUAL;
+}
+
+
+void mode_security_callback()
+{
+	past_mode = current_mode;
+	current_mode = SECURITY;
+}
+
+void mode_auto_callback()
+{
+	past_mode = current_mode;
+	current_mode = AUTO;
 }
 
 /*void fire_callback()
 {
 
-}
-
-void left_callback()
-{
-
-}
-void right_callback()
-{
-
-}
-void up_callback()
-{
-
-}
-void down_callback()
-{
-
 }*/
 
-void retrieve_and_process_image(void)
+
+void photo_callback()
 {
-    take_picture();
-    uint32_t size = frame_length();
-    uint32_t len = size;
-    printf("Frame size: %ld\n", size);
+	uint8_t * jpeg_photo_buffer = NULL;
+    write_processing_message(RED);
+	take_picture();
+	process_user_input(MANUAL_POLL);
+	uint32_t photo_size = read_full_picture(&jpeg_photo_buffer);
+	if (photo_size == 0)
+	{
+		printf("ERROR, CANT TAKE MANUAL PHOTO!");
+		return;
+	}
+	process_user_input(MANUAL_POLL);
+	int decode_return = njDecode(jpeg_photo_buffer, photo_size);
+	if (decode_return == 0)
+	{
+		unsigned char *bitmap = njGetImage();
+		process_user_input(MANUAL_POLL);
+		unsigned char PMF[320][240];
+		unsigned char value;
+		int curr;
+		for(curr = 0; curr < njGetImageSize()/3; curr++)
+		{
+			value = (bitmap[3*curr] & 0xC0) | (bitmap[3*curr+1] & 0xC0)>>2 |  (bitmap[3*curr+2] & 0xC0)>>4;
+			PMF[curr%320][(int)(curr/320)] = (value)>>2;
+		}
+		process_user_input(MANUAL_POLL);
+		print_image(PMF, 320, 240);
+	}
 
-    int current_index = 0;
-    int i;
-    uint8_t *jpeg_buffer = malloc((sizeof(uint8_t)*size) + 10);
-    uint8_t *buffer;
-
-    /*while (size > 64) {
-        // read 32 bytes at a time;
-        buffer = read_picture(64);
-        size -= 64;
-        for(i=0;i<64;i++)
-            jpeg_buffer[current_index+i] = *(buffer+i);
-        current_index += 64;
-    }
-
-    buffer = read_picture(size);
-    for(i=0;i<size;i++)
-        jpeg_buffer[current_index+i] = *(buffer+i);*/
-
-    while (size > 64) {
-            // read 32 bytes at a time;
-            read_picture_to_ptr(jpeg_buffer, 64);
-            size -= 64;
-        }
-
-    read_picture_to_ptr(jpeg_buffer, size);
-
-
-    resume_picture();
-    printf("DECODING\n");
-
-    //print_byte_array(jpeg_buffer, len);
-    printf("The value of decode is: %d\n", njDecode(jpeg_buffer,len));
-
-
-    unsigned char *bitmap = njGetImage();
-    unsigned char PMF[320][240];
-    unsigned char value;
-    int curr;
-    for(curr = 0; curr < njGetImageSize()/3; curr++)
-    {
-        value = (bitmap[3*curr] & 0xC0) | (bitmap[3*curr+1] & 0xC0)>>2 |  (bitmap[3*curr+2] & 0xC0)>>4;
-        PMF[curr%320][(int)(curr/320)] = (value)>>2;
-    }
-
-    print_image(PMF, 320, 240);
-    free(jpeg_buffer);
+	reticle(RED);
+	resume_picture();
+	free(jpeg_photo_buffer);
+	erase_processing_message();
 }
-
-
-/*int void_main()
-{
-    njInit();
-    cam_init();
-    init_gui();
-
-
-    camera_reset();
-    unsigned char y = get_image_resolution();
-    printf("Data is: [%02x]\n", y);
-    y = set_image_resolution(FRAME_320x240);
-    printf("Set returned : [%02x]\n", y);
-    y = get_image_resolution();
-    printf("Data is: [%02x]\n", y);
-
-    // Getting an image setup
-    while (1)
-        proccess_buttons(10000);
-    printf("done\n");
-    njDone();
-    return 0;
-}*/
-
 
 void security_mode(void)
 {
@@ -142,7 +134,14 @@ void security_mode(void)
 	 * SEND SMS WITH TIME
 	 * SAVE PHOTO TO CLOUD
 	 **********************/
-	uint8_t * jpeg_photo_buffer;
+	disable_button(UP_BUTTON);
+	disable_button(DOWN_BUTTON);
+	disable_button(LEFT_BUTTON);
+	disable_button(RIGHT_BUTTON);
+	disable_button(FIRE_BUTTON);
+	disable_button(CAMERA_BUTTON);
+
+	uint8_t * jpeg_photo_buffer = NULL;
 	set_motion_detect(1);
 	if (get_motion_detect())
 		printf("ON\n");
@@ -150,45 +149,116 @@ void security_mode(void)
 		printf("OFF\n");
 
 	set_motion_detect(1);
-	if (motion_detected(SECURITY_POLL))
+	int motion = motion_detected(SECURITY_POLL);
+	if (motion)
 	{
-	    if (take_picture())
-	    {
-	    	printf("TOOK THE PHOTO!\n");
-	    	uint32_t photo_size = read_full_picture(jpeg_photo_buffer);
-	    	/**********************
-			 * WIFI CODE HERE
-			 * SEND SMS WITH TIME
-			 * SAVE PHOTO TO CLOUD
-			 **********************/
-	    }
+		// TODO SMS
+	}
+
+	int photo = take_picture();
+	if (photo)
+	{
+		uint32_t photo_size = read_full_picture(&jpeg_photo_buffer);
+		// TODO encode data
+		// TODO send data;
 
 	}
+
+	process_user_input(SECURITY_POLL);
 
 	free(jpeg_photo_buffer);
 	resume_picture();
 	set_motion_detect(0);
 }
 
+void auto_mode(void)
+{
+	disable_button(DOWN_BUTTON);
+	disable_button(LEFT_BUTTON);
+	disable_button(RIGHT_BUTTON);
+	disable_button(FIRE_BUTTON);
+	disable_button(CAMERA_BUTTON);
+	disable_button(UP_BUTTON);
+
+	uint8_t * jpeg_photo_buffer = NULL;
+
+	// Move the motor
+	move_left();
+	usleep(200000);
+	stop_leftrght();
+
+	// Check Motion
+	set_motion_detect(1);
+	if (get_motion_detect())
+		printf("ON\n");
+	  else
+		printf("OFF\n");
+
+	process_user_input(AUTO_POLL);
+	int motion = motion_detected(SECURITY_POLL);
+	if (motion)
+	{
+		// TODO SMS
+		// TODO FIRE
+	}
+
+	process_user_input(AUTO_POLL);
+	int photo = take_picture();
+	if (photo)
+	{
+		uint32_t photo_size = read_full_picture(&jpeg_photo_buffer);
+		// TODO PRINT TO SCREEN
+		// TODO encode data
+		// TODO send data;
+	}
+}
+
+void manual_mode(void)
+{
+	enable_button(UP_BUTTON);
+	enable_button(DOWN_BUTTON);
+	enable_button(LEFT_BUTTON);
+	enable_button(RIGHT_BUTTON);
+	enable_button(FIRE_BUTTON);
+	enable_button(CAMERA_BUTTON);
+}
+
 int main (void)
 {
+	printf("HELLO WORLD!?!?!\n");
+	send_image_to_server(NULL, 100);
+	// Mode Initialization
+	current_mode = MANUAL;
+	past_mode = MANUAL;
+	// Initialize the camera
+	njInit();
 	cam_init();
     camera_reset();
     printf(" Image Resolution was %d\n", get_image_resolution());
-    set_image_resolution(FRAME_160x120);
+    set_image_resolution(FRAME_320x240);
 	printf(" Image Resolution was %d\n", get_image_resolution());
-    /**********************
-     * MOTOR INIT CODE HERE
-     **********************/
+
+	// Gui init code
+	init_motors();
+	set_motor_speed(DEFAULT_MOTOR_SPEED);
+//	motor_test();
+
+	// Gui init code
 	init_gui();
+	change_button_callback(LEFT_BUTTON, move_left);
+	change_button_callback(RIGHT_BUTTON, move_right);
+	change_button_callback(UP_BUTTON, move_up);
+	change_button_callback(DOWN_BUTTON, move_down);
+	change_button_callback(MANUAL_BUTTON, mode_manual_callback);
+	change_button_callback(SECURITY_BUTTON, mode_security_callback);
+	change_button_callback(AUTOMATIC_BUTTON, mode_auto_callback);
+	change_button_callback(FIRE_BUTTON, motor_fire);
+	change_button_callback(CAMERA_BUTTON, photo_callback);
+
+
 	/**********************
-	 * CALLBACK INIT CODE HERE
+	 * CALLBACK INIT CODE FOR FIRE HERE!
 	 **********************/
-
-
-	current_mode = MANUAL;
-	past_mode = MANUAL;
-
 
     while (1)
     {
@@ -197,6 +267,13 @@ int main (void)
     	{
     	case SECURITY:
     		security_mode();
+    		break;
+    	case MANUAL:
+    		manual_mode();
+    		break;
+    	case AUTO:
+			auto_mode();
+			break;
     	}
     }
 }

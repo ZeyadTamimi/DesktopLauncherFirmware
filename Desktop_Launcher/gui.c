@@ -14,7 +14,7 @@
 //===================================================================
 // Defines
 //===================================================================
-#define MAX_BUTTONS 8
+#define MAX_BUTTONS 9
 #define TOGGLEABLE_BUTTON_NUMBER 3
 #define MODE_BUTTON_NUMBER 3
 
@@ -22,7 +22,6 @@
 //===================================================================
 // Private Types
 //===================================================================
-typedef void (*function)();
 
 typedef struct Button {
 	int x0, y0;
@@ -33,6 +32,7 @@ typedef struct Button {
 	int pressed_button_color;
 	function callback;
 	int toggled;
+	int disabled;
 } Button;
 
 
@@ -81,7 +81,10 @@ void buttons_not_pressed(int start_index, int stop_index)
 	for (current_button_index = start_index; current_button_index < stop_index; current_button_index++)
 	{
 		Button *current_button = &button_array[current_button_index];
-		draw_button(current_button->normal_button_type, current_button->normal_button_color);
+		if (!current_button->disabled)
+			draw_button(current_button->normal_button_type, current_button->normal_button_color);
+		else
+			draw_button(current_button->normal_button_type, GREY);
 		current_button->toggled = 0;
 	}
 }
@@ -99,32 +102,81 @@ int change_button_callback(int button_id, function callback)
 	return 1;
 }
 
-int process_user_input(int timeout_usec)
+int disable_button(int button_id)
 {
-    int pressed_button_index = poll_touch(timeout_usec);
+	if (button_id >= MAX_BUTTONS)
+			return 0;
 
-    if (pressed_button_index == -1)
-    {
-    	buttons_not_pressed(TOGGLEABLE_BUTTON_NUMBER, MAX_BUTTONS);
-        return 0;
-    }
+	if (button_array[button_id].disabled)
+		return 0;
 
-	Button *pressed_button = &button_array[pressed_button_index];
-
-    if (pressed_button_index < TOGGLEABLE_BUTTON_NUMBER)
-    	buttons_not_pressed(0, MODE_BUTTON_NUMBER);
-
-    buttons_not_pressed(TOGGLEABLE_BUTTON_NUMBER, MAX_BUTTONS);
-
-    if(pressed_button->toggled == 0)
-	{
-    	draw_button(pressed_button->pressed_button_type, pressed_button->pressed_button_color);
-    	pressed_button->toggled = 1;
-    	if (pressed_button->callback != NULL)
-    		pressed_button->callback();
-	}
+	button_array[button_id].disabled = 1;
+	button_array[button_id].toggled = 0;
+	draw_button(button_array[button_id].normal_button_type, GREY);
 
 	return 1;
+}
+
+int enable_button(int button_id)
+{
+	if (button_id >= MAX_BUTTONS)
+			return 0;
+
+	if (!button_array[button_id].disabled)
+		return 0;
+
+	button_array[button_id].disabled = 0;
+	button_array[button_id].toggled = 0;
+	draw_button(button_array[button_id].normal_button_type, button_array[button_id].normal_button_color);
+	return 1;
+}
+
+void process_user_input(int timeout_usec)
+{
+	int pressed_button_index = -1;
+	int prev_pressed_button_index = -1;
+	Button *pressed_button = NULL;
+
+	do
+	{
+		prev_pressed_button_index = pressed_button_index;
+		pressed_button_index = poll_touch(timeout_usec);
+
+		if (pressed_button_index == -1)
+			break;
+
+		if (prev_pressed_button_index != -1 && (prev_pressed_button_index != pressed_button_index))
+			break;
+
+		pressed_button = &button_array[pressed_button_index];
+
+		if (pressed_button_index < TOGGLEABLE_BUTTON_NUMBER)
+		{
+			buttons_not_pressed(0, MODE_BUTTON_NUMBER);
+			buttons_not_pressed(TOGGLEABLE_BUTTON_NUMBER, MAX_BUTTONS);
+		}
+
+		if (pressed_button->disabled)
+			break;
+
+		if(pressed_button->toggled == 0)
+		{
+			draw_button(pressed_button->pressed_button_type, pressed_button->pressed_button_color);
+			pressed_button->toggled = 1;
+		}
+
+		if (pressed_button->callback != NULL)
+			pressed_button->callback();
+
+	} while( pressed_button_index != -1);
+
+	if (pressed_button_index != -1 || prev_pressed_button_index != -1)
+	{
+		buttons_not_pressed(TOGGLEABLE_BUTTON_NUMBER, MAX_BUTTONS);
+		stop_leftrght();
+
+	}
+	return;
 }
 
 void init_gui(){
@@ -145,6 +197,7 @@ void init_gui(){
     manual_button.pressed_button_color = WHITE;
     manual_button.toggled = 0;
     manual_button.callback = NULL;
+    manual_button.disabled = 0;
 
     Button automatic_button;
     automatic_button.x0 = 590;
@@ -157,6 +210,7 @@ void init_gui(){
     automatic_button.pressed_button_color = WHITE;
     automatic_button.toggled = 0;
     automatic_button.callback = NULL;
+    automatic_button.disabled = 0;
 
     Button security_button;
     security_button.x0 = 680;
@@ -169,6 +223,8 @@ void init_gui(){
     security_button.pressed_button_color = WHITE;
     security_button.toggled = 0;
     security_button.callback = NULL;
+    security_button.disabled = 0;
+
 
 	Button fire_button;
 	fire_button.x0 = 580;
@@ -181,6 +237,7 @@ void init_gui(){
 	fire_button.pressed_button_color = MAROON;
 	fire_button.toggled = 0;
 	fire_button.callback = NULL;
+	fire_button.disabled = 0;
 
 	Button left_button;
 	left_button.x0 = 0;
@@ -193,6 +250,7 @@ void init_gui(){
 	left_button.pressed_button_color = FORESTGREEN;
 	left_button.toggled = 0;
 	left_button.callback = NULL;
+	left_button.disabled = 0;
 
 	Button right_button;
 	right_button.x0 = 750;
@@ -205,6 +263,7 @@ void init_gui(){
 	right_button.pressed_button_color = FORESTGREEN;
 	right_button.toggled = 0;
 	right_button.callback = NULL;
+	right_button.disabled = 0;
 
 	Button up_button;
 	up_button.x0 = 350;
@@ -217,6 +276,8 @@ void init_gui(){
 	up_button.pressed_button_color = FORESTGREEN;
 	up_button.toggled = 0;
 	up_button.callback = NULL;
+	up_button.disabled = 0;
+
 
 	Button down_button;
 	down_button.x0 = 350;
@@ -229,6 +290,20 @@ void init_gui(){
 	down_button.pressed_button_color = FORESTGREEN;
 	down_button.toggled = 0;
 	down_button.callback = NULL;
+	down_button.disabled = 0;
+
+	Button camera_button;
+	camera_button.x0 = 170;
+	camera_button.x1 = 230;
+	camera_button.y0 = 410;
+	camera_button.y1 = 470;
+	camera_button.normal_button_type = camera;
+	camera_button.normal_button_color = CYAN;
+	camera_button.pressed_button_type = camera_pressed;
+	camera_button.pressed_button_color = BLACK;
+	camera_button.toggled = 0;
+	camera_button.callback = NULL;
+	camera_button.disabled = 0;
 
 	button_array[MANUAL_BUTTON] = manual_button;
 	button_array[AUTOMATIC_BUTTON] = automatic_button;
@@ -238,8 +313,9 @@ void init_gui(){
 	button_array[RIGHT_BUTTON] = right_button;
 	button_array[UP_BUTTON] = up_button;
 	button_array[DOWN_BUTTON] = down_button;
+	button_array[CAMERA_BUTTON] = camera_button;
 
-    print_display(LIME,CYAN,WHITE,RED,RED);
+    print_display(LIME,CYAN,WHITE,RED,RED, CYAN);
 }
 
 

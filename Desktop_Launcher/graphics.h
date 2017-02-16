@@ -22,6 +22,7 @@
 #define OLIVE			40
 #define FORESTGREEN		8
 #define MAROON			32
+#define GREY			42
 
 typedef enum button_type
 {
@@ -29,7 +30,7 @@ typedef enum button_type
 	automatic,
 	security,
 	fire,
-	photo,
+	camera,
 	left,
 	right,
 	down,

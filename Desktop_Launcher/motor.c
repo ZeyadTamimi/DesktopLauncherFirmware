@@ -12,12 +12,16 @@
 //===================================================================
 // Motor Limits
 //===================================================================
-#define kCW180_MAX 7500
-#define kCW180_MIN 1850
-#define kCW180_MID (( kCW180_MIN + kCW180_MAX ) / 2)
+#define kCW180_MAX 5500
+#define kCW180_MIN 2500
+#define kCW180_MID 3900
 
-#define kRANGE360 1000
-#define kCW360_MID 4150
+#define kCWFIRE_MAX 7000
+#define kCWFIRE_MIN 2000
+#define kCWFIRE_MID 4700
+
+#define kRANGE360 32
+#define kCW360_MID 4128
 #define kCW360_MAX (kCW360_MID + kRANGE360)
 #define kCW360_MIN (kCW360_MID - kRANGE360)
 
@@ -50,6 +54,7 @@ int motor_test()
 		int pwm_counter;
 		printf("enter: ");
 		scanf("%d", &pwm_counter);
+		set_direct_PWM(2, pwm_counter);
 
 	}
 	return 0;
@@ -62,20 +67,10 @@ void init_motors(void)
     set_motor_speed(1);
     PWM_CW180 = kCW180_MID;
     PWM_CW360 = kCW360_MID;
-    PWM_CWFIRE = kCW180_MID;
+    PWM_CWFIRE = kCWFIRE_MID;
 }
 
 void move_up(void)
-{
-    if (PWM_CW180 < kCW180_MAX)
-    {
-        PWM_CW180 += updown_speed;
-        PWM_CW180 = PWM_CW180 < kCW180_MAX ? PWM_CW180 : kCW180_MAX;
-        assert(PWM_CW180 <= kCW180_MAX);
-    }
-}
-
-void move_down(void)
 {
     if (PWM_CW180 > kCW180_MIN)
     {
@@ -85,24 +80,24 @@ void move_down(void)
     }
 }
 
+void move_down(void)
+{
+    if (PWM_CW180 < kCW180_MAX)
+    {
+        PWM_CW180 += updown_speed;
+        PWM_CW180 = PWM_CW180 < kCW180_MAX ? PWM_CW180 : kCW180_MAX;
+        assert(PWM_CW180 <= kCW180_MAX);
+    }
+}
+
 void move_left(void)
 {
-    if (PWM_CW360 < kCW360_MAX)
-    {
-        PWM_CW360 += leftright_speed;
-        PWM_CW360 = PWM_CW360 < kCW360_MAX ? PWM_CW360 : kCW360_MAX;
-        assert(PWM_CW360 <= kCW360_MAX);
-    }
+	PWM_CW360 = kCW360_MID + kRANGE360 * leftright_speed;
 }
 
 void move_right(void)
 {
-    if (PWM_CW360 > kCW360_MIN)
-    {
-        PWM_CW360 -= leftright_speed;
-        PWM_CW360 = PWM_CW360 > kCW360_MIN ? PWM_CW360 : kCW360_MIN;
-        assert(PWM_CW360 >= kCW360_MIN);
-    }
+	PWM_CW360 = kCW360_MID - kRANGE360 * leftright_speed;
 }
 
 void stop_leftrght(void)
@@ -112,18 +107,18 @@ void stop_leftrght(void)
 
 void motor_load(void)
 {
-    PWM_CWFIRE = kCW180_MID;
+    PWM_CWFIRE = kCWFIRE_MID;
 }
 
 void motor_fire(void)
 {
-    PWM_CWFIRE = kCW180_MAX;
+    PWM_CWFIRE = kCWFIRE_MAX;
 }
 
 void set_motor_speed(int speed_multiplier)
 {
-    updown_speed = 50 * speed_multiplier;
-    leftright_speed = 10 * speed_multiplier;
+    updown_speed = 5 * speed_multiplier;
+    leftright_speed = speed_multiplier;
 }
 
 // Use this to debug!
