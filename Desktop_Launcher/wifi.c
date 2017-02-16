@@ -56,20 +56,20 @@ int send_data(uint8_t *image_data, size_t image_size)
 	int max_string_size = MAX_BYTES*2 + SEND_DATA_SIZE;
 	uint8_t string_image_data[max_string_size + 1];
 
+    string_image_data[0] = 's';
+    string_image_data[1] = 'e';
+    string_image_data[2] = 'n';
+    string_image_data[3] = 'd';
+    string_image_data[4] = '_';
+    string_image_data[5] = 'd';
+    string_image_data[6] = 'a';
+    string_image_data[7] = 't';
+    string_image_data[8] = 'a';
+    string_image_data[9] = '(';
+    string_image_data[10] = '\'';
 	// Send the image data encoded in ascii in MAX_BYTES packets
 	while (image_size - MAX_BYTES*2 >= 0)
 	{
-		string_image_data[0] = 's';
-		string_image_data[1] = 'e';
-		string_image_data[2] = 'n';
-		string_image_data[3] = 'd';
-		string_image_data[4] = '_';
-		string_image_data[5] = 'd';
-		string_image_data[6] = 'a';
-		string_image_data[7] = 't';
-		string_image_data[8] = 'a';
-		string_image_data[9] = '(';
-		string_image_data[10] = '\'';
 		int i = 11;
 		for (i = 11; i < max_string_size - 3; i++)
 		{
@@ -85,17 +85,6 @@ int send_data(uint8_t *image_data, size_t image_size)
 	// last run through
 	if (image_size > 0)
 	{
-		string_image_data[0] = 's';
-		string_image_data[1] = 'e';
-		string_image_data[2] = 'n';
-		string_image_data[3] = 'd';
-		string_image_data[4] = '_';
-		string_image_data[5] = 'd';
-		string_image_data[6] = 'a';
-		string_image_data[7] = 't';
-		string_image_data[8] = 'a';
-		string_image_data[9] = '(';
-		string_image_data[10] = '\'';
 		int i = 11;
 		for (i = 11; i < image_size + 11; i++)
 		{
