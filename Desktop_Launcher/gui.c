@@ -233,9 +233,9 @@ void init_gui(){
 	bluetooth_button.y1 = 50;
 	bluetooth_button.normal_button_type = bluetooth;
 	bluetooth_button.normal_button_color = CYAN;
-	bluetooth_button..pressed_button_type = bluetooth_pressed;
-	bluetooth_button..pressed_button_color = WHITE;
-	bluetooth_button..toggled = 0;
+	bluetooth_button.pressed_button_type = bluetooth_pressed;
+	bluetooth_button.pressed_button_color = WHITE;
+	bluetooth_button.toggled = 0;
 	bluetooth_button.callback = NULL;
 	bluetooth_button.disabled = 0;
 	//-----------------------------------

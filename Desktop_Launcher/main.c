@@ -34,9 +34,9 @@ typedef enum desktop_launcher_mode
 {
 	MANUAL= 0x00,
 	AUTO = 0x01,
-	SECURITY = 0x02
+	SECURITY = 0x02,
 	//ADDED---------
-	BLUETOOTH = 0x03;
+	BLUETOOTH = 0x03
 	//--------------
 }desktop_launcher_mode;
 
@@ -205,12 +205,13 @@ void bluetooth_mode(void)
 //===================================================================
 // Bluetooth Command Handlers
 //===================================================================
-uint8_t move_command_time(uint8_t bluetooth_rx_message, uint16_t size)
+uint8_t move_command_time(uint8_t *bluetooth_rx_message, uint16_t size)
 {
 	// TODO Add size check
 	uint32_t wait_time = 0;
 	// Retrieve the wait time
-	for (int byte_index = 0; byte_index < MOVE_COMMAND_TIME_LENGTH; byte_index++)
+	int byte_index;
+	for (byte_index = 0; byte_index < MOVE_COMMAND_TIME_LENGTH; byte_index++)
 		wait_time |= bluetooth_rx_message[MESG_FIELD_HEADER_SIZE + MESG_MOVE_FIELD_DIR_SIZE + byte_index] << (8 * (3 - byte_index));
 	// Get the direction
 	uint8_t direction = bluetooth_rx_message[MESG_FIELD_HEADER_SIZE];
@@ -223,7 +224,7 @@ uint8_t move_command_time(uint8_t bluetooth_rx_message, uint16_t size)
 	return RESPONSE_NO_ERROR;
 }
 
-uint8_t set_motor_speed_command(uint8_t bluetooth_rx_message, uint16_t size)
+uint8_t set_motor_speed_command(uint8_t *bluetooth_rx_message, uint16_t size)
 {
 	// TODO Add size check
 	uint8_t new_speed = bluetooth_rx_message[MESG_FIELD_HEADER_SIZE];
@@ -234,7 +235,7 @@ uint8_t set_motor_speed_command(uint8_t bluetooth_rx_message, uint16_t size)
 }
 
 
-int handle_command(uint8_t bluetooth_rx_message, uint16_t size)
+int handle_command(uint8_t *bluetooth_rx_message, uint16_t size)
 {
 	uint8_t response_code;
 	// Handle Command Messages
@@ -255,7 +256,7 @@ int handle_command(uint8_t bluetooth_rx_message, uint16_t size)
 	// TODO Function that sends the response message
 }
 
-int handle_request(uint8_t bluetooth_rx_message, uint16_t size)
+int handle_request(uint8_t *bluetooth_rx_message, uint16_t size)
 {
 	// Handle Command Messages
 	switch (bluetooth_rx_message[0])
@@ -350,5 +351,3 @@ int main (void)
 		}
     }
 }
-
-

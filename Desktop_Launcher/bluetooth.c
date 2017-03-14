@@ -83,11 +83,29 @@ void bluetooth_main(void)
 	printf("bluetooth alive\n");
 	init_bluetooth();
 
-	char c = 0;
+	int i = 0;
 
-	while(1){
-		scanf("%c", &c);
+	while(!i) {
 		printf("connected: [%d]", bluetooth_connected());
+		scanf("%d", &i);
+	}
+
+//	uint8_t out[5];
+//	for(i=0;i<5;i++) {
+//		out[i]=i+1;
+//	}
+//
+//	i=0;
+//	while(!i) {
+//		serial_write(BLUETOOTH, out, 5);
+//		scanf("%d", &i);
+//	}
+
+	i=0;
+	uint8_t big[35000];
+	while(!i) {
+		serial_read(BLUETOOTH, big, 35000);
+		printf("done");
 	}
 }
 
