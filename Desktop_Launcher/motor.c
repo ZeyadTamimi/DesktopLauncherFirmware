@@ -1,6 +1,7 @@
 #include <assert.h>
 
 #include "motor.h"
+#include <unistd.h>
 
 //===================================================================
 // Memory Mapped Defines
@@ -16,9 +17,9 @@
 #define kCW180_MIN 2500
 #define kCW180_MID 3900
 
-#define kCWFIRE_MAX 7000
+#define kCWFIRE_MAX 5750
 #define kCWFIRE_MIN 2000
-#define kCWFIRE_MID 4700
+#define kCWFIRE_MID 3000
 
 #define kRANGE360 32
 #define kCW360_MID 4128
@@ -54,7 +55,7 @@ int motor_test()
 		int pwm_counter;
 		printf("enter: ");
 		scanf("%d", &pwm_counter);
-		set_direct_PWM(1, pwm_counter);
+		set_direct_PWM(2, pwm_counter);
 
 	}
 	return 0;
@@ -69,6 +70,26 @@ void init_motors(void)
     PWM_CW360 = kCW360_MID;
     PWM_CWFIRE = kCWFIRE_MID;
 }
+
+void move_direction(int direction)
+{
+	switch(direction)
+	{
+	case MOVE_UP:
+		move_up();
+		break;
+	case MOVE_DOWN:
+		move_down();
+		break;
+	case MOVE_LEFT:
+		move_left();
+		break;
+	case MOVE_RIGHT:
+		move_right();
+		break;
+	}
+}
+
 
 void move_up(void)
 {
@@ -113,6 +134,8 @@ void motor_load(void)
 void motor_fire(void)
 {
     PWM_CWFIRE = kCWFIRE_MAX;
+    usleep(500000);
+    PWM_CWFIRE = kCWFIRE_MID;
 }
 
 void set_motor_speed(int speed_multiplier)

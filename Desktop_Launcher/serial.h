@@ -15,6 +15,7 @@
 //===================================================================
 // Defines
 //===================================================================
+#define BLUETOOTH (volatile unsigned char *)(0x84000200)
 #define WIFI (volatile unsigned char *)(0x84000220)
 #define CAMERA (volatile unsigned char *)(0x84000210)
 #define TOUCHSCREEN (volatile unsigned char *)(0x84000230)

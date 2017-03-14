@@ -14,7 +14,7 @@
 #define CONNECT_DB_SIZE 10
 #define CLOSE_DB_SIZE 8
 
-const char * k_send_data_command = "send_data('%s')\n";
+const char * k_send_data_command = "send_data('%04x')\n";
 const char * k_send_sms_command = "send_sms('%s')\n";
 const char * k_connect_db_command = "connect()\n";
 const char * k_close_db_connection = "close()\n";
@@ -48,7 +48,7 @@ int send_data(uint8_t *image_data, size_t image_size)
 {
 	// Encode the length
 	uint8_t length_image_data[SEND_DATA_SIZE + 5];
-	int len_wrote = snprintf(length_image_data, SEND_DATA_SIZE + 5, "%s('%04x')",
+	int len_wrote = snprintf(length_image_data, SEND_DATA_SIZE + 5,
 							k_send_data_command, image_size & 0xFFFF);
 	printf("THE MESSAGE IS: %s",length_image_data);
 	serial_write(WIFI, length_image_data, len_wrote);
@@ -68,32 +68,37 @@ int send_data(uint8_t *image_data, size_t image_size)
     string_image_data[9] = '(';
     string_image_data[10] = '\'';
 	// Send the image data encoded in ascii in MAX_BYTES packets
-	while (image_size - MAX_BYTES*2 >= 0)
+	while (image_size >= MAX_BYTES)
 	{
-		int i = 11;
-		for (i = 11; i < max_string_size - 3; i++)
+		int i;
+		for (i = 11; i < max_string_size - 3; i+=2)
 		{
-			snprintf(&string_image_data[i], 1, "%02x", image_data++[i]);
+			snprintf(&string_image_data[i], 2, "%02x", *image_data);
+			image_data++;
 		}
 		string_image_data[max_string_size - 3] = '\'';
 		string_image_data[max_string_size - 2] = ')';
 		string_image_data[max_string_size - 1] = '\n';
-		image_size -= MAX_BYTES*2;
+		image_size -= MAX_BYTES;
 		serial_write(WIFI, string_image_data, max_string_size);
 	}
 
 	// last run through
+	uint8_t *special_pointer = string_image_data + 11;
 	if (image_size > 0)
 	{
-		int i = 11;
-		for (i = 11; i < image_size + 11; i++)
+		int i;
+		for (i = 11; i < (image_size*2) + 11; i+=2)
 		{
-			snprintf(&string_image_data[i], 1, "%02x", image_data++[i]);
+			//printf("%02x", *image_data);
+			special_pointer += snprintf(special_pointer, 3, "%02x", *image_data);
+			image_data++;
 		}
-		string_image_data[image_size + 11] = '\'';
-		string_image_data[image_size + 12] = ')';
-		string_image_data[image_size + 13] = '\n';
-		serial_write(WIFI, string_image_data, image_size + 13);
+		string_image_data[(image_size*2) + 11] = '\'';
+		string_image_data[(image_size*2) + 12] = ')';
+		string_image_data[(image_size*2) + 13] = '\n';
+		//print_byte_array(string_image_data, (image_size*2) + 14);
+		serial_write(WIFI, string_image_data, (image_size*2) + 14);
 	}
 
 	return 1;

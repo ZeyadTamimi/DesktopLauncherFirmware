@@ -41,14 +41,19 @@ volatile unsigned char edge_capture;
 //===================================================================
 void init_serial(volatile unsigned char* device)
 {
+	// Reset the control register
     CONTROL(device) = 0x00;
     CONTROL(device) = 0x15;
+
+    // Set the baud rate;
     if (device == TOUCHSCREEN)
         BAUD(device) = 0x07;
     else if (device == CAMERA)
         BAUD(device) = 0x03;
     else if (device == WIFI)
-    	BAUD(device) = 0x01; // 115200
+    	BAUD(device) = 0x01;
+    else if (device == BLUETOOTH)
+    	BAUD(device) = 0x01;
     else
     	BAUD(device) = 0x01;
 }

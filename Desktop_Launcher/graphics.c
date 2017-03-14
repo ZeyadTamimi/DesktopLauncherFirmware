@@ -284,7 +284,7 @@ void write_processing_message(int colour)
 
 void erase_processing_message(void)
 {
-	rectangle(345,60,460,80,BLACK);
+	rectangle(345,60,470,110,BLACK);
 }
 
 /*
