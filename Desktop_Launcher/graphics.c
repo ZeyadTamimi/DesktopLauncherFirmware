@@ -301,6 +301,11 @@ void print_display(int arrow_colour, int menu_colour, int screen_colour,
 	draw_button(fire,fire_colour);
 	draw_button(camera,camera_colour);
 	draw_button(security,menu_colour);
+
+	//ADDED----------------------------
+	draw_button(bluetooth,menu_colour);
+	//---------------------------------
+
 	draw_button(manual,menu_colour);
 	draw_button(automatic,menu_colour);
 	draw_button(left,arrow_colour);
@@ -328,35 +333,50 @@ void draw_button(button_type button, int colour){
 		rectangle(185,420,195,425,BLACK);
 		circle(215,430,2,RED);
 		break;
-	case(manual):
-		rectangle(500,10,580,50,colour);
-		OutGraphicsCharFont1(520,27,BLACK,colour,'M',0);
-		OutGraphicsCharFont1(528,27,BLACK,colour,'A',0);
-		OutGraphicsCharFont1(536,27,BLACK,colour,'N',0);
-		OutGraphicsCharFont1(544,27,BLACK,colour,'U',0);
-		OutGraphicsCharFont1(552,27,BLACK,colour,'A',0);
-		OutGraphicsCharFont1(560,27,BLACK,colour,'L',0);
+	case(manual): 
+		rectangle(410,10,490,50,colour); 				 //CHANGED
+		OutGraphicsCharFont1(430,27,BLACK,colour,'M',0); //CHANGED
+		OutGraphicsCharFont1(438,27,BLACK,colour,'A',0); //CHANGED
+		OutGraphicsCharFont1(446,27,BLACK,colour,'N',0); //CHANGED
+		OutGraphicsCharFont1(454,27,BLACK,colour,'U',0); //CHANGED
+		OutGraphicsCharFont1(462,27,BLACK,colour,'A',0); //CHANGED
+		OutGraphicsCharFont1(470,27,BLACK,colour,'L',0); //CHANGED
 		break;
 
 	case(automatic):
-		rectangle(590,10,670,50,colour);
-		OutGraphicsCharFont1(618,27,BLACK,colour,'A',0);
-		OutGraphicsCharFont1(624,27,BLACK,colour,'U',0);
-		OutGraphicsCharFont1(632,27,BLACK,colour,'T',0);
-		OutGraphicsCharFont1(640,27,BLACK,colour,'O',0);
+		rectangle(500,10,580,50,colour);                 //CHANGED
+		OutGraphicsCharFont1(528,27,BLACK,colour,'A',0); //CHANGED
+		OutGraphicsCharFont1(534,27,BLACK,colour,'U',0); //CHANGED
+		OutGraphicsCharFont1(542,27,BLACK,colour,'T',0); //CHANGED
+		OutGraphicsCharFont1(550,27,BLACK,colour,'O',0); //CHANGED
 		break;
 
 	case(security):
-		rectangle(680,10,760,50,colour);
-		OutGraphicsCharFont1(692,27,BLACK,colour,'S',0);
-		OutGraphicsCharFont1(700,27,BLACK,colour,'E',0);
-		OutGraphicsCharFont1(708,27,BLACK,colour,'C',0);
-		OutGraphicsCharFont1(716,27,BLACK,colour,'U',0);
-		OutGraphicsCharFont1(724,27,BLACK,colour,'R',0);
-		OutGraphicsCharFont1(732,27,BLACK,colour,'I',0);
-		OutGraphicsCharFont1(740,27,BLACK,colour,'T',0);
-		OutGraphicsCharFont1(748,27,BLACK,colour,'Y',0);
+		rectangle(590,10,670,50,colour);                 //CHANGED
+		OutGraphicsCharFont1(602,27,BLACK,colour,'S',0); //CHANGED
+		OutGraphicsCharFont1(610,27,BLACK,colour,'E',0); //CHANGED
+		OutGraphicsCharFont1(618,27,BLACK,colour,'C',0); //CHANGED
+		OutGraphicsCharFont1(626,27,BLACK,colour,'U',0); //CHANGED
+		OutGraphicsCharFont1(634,27,BLACK,colour,'R',0); //CHANGED
+		OutGraphicsCharFont1(642,27,BLACK,colour,'I',0); //CHANGED
+		OutGraphicsCharFont1(650,27,BLACK,colour,'T',0); //CHANGED
+		OutGraphicsCharFont1(658,27,BLACK,colour,'Y',0); //CHANGED
 		break;
+
+	//ADDED-----------------------------------------------
+	case(bluetooth):
+		rectangle(680,10,760,50,colour);
+		OutGraphicsCharFont1(688,27,BLACK,colour,'B',0);
+		OutGraphicsCharFont1(694,27,BLACK,colour,'L',0);
+		OutGraphicsCharFont1(704,27,BLACK,colour,'U',0);
+		OutGraphicsCharFont1(712,27,BLACK,colour,'E',0);
+		OutGraphicsCharFont1(720,27,BLACK,colour,'T',0);
+		OutGraphicsCharFont1(728,27,BLACK,colour,'O',0);
+		OutGraphicsCharFont1(736,27,BLACK,colour,'O',0);
+		OutGraphicsCharFont1(744,27,BLACK,colour,'T',0);
+		OutGraphicsCharFont1(752,27,BLACK,colour,'H',0);
+
+	//----------------------------------------------------
 
 	case(left):
 		left_triangle(LARROW_X1,LARROW_Y1,ARROW_LENGTH,colour);

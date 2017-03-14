@@ -35,10 +35,13 @@ typedef enum desktop_launcher_mode
 	MANUAL= 0x00,
 	AUTO = 0x01,
 	SECURITY = 0x02
+	//ADDED---------
+	BLUETOOTH = 0x03;
+	//--------------
 }desktop_launcher_mode;
 
 volatile desktop_launcher_mode current_mode;
-volatile int bluetooth;
+volatile int bluetooth_value;  //CHANGED
 
 //===================================================================
 // Callbacks
@@ -58,6 +61,14 @@ void mode_auto_callback()
 {
 	current_mode = AUTO;
 }
+
+//ADDED-------------------------
+void mode_bluetooth_callback()
+{
+	current_mode = BLUETOOTH;
+}
+//------------------------------
+
 
 void photo_callback()
 {
@@ -178,6 +189,19 @@ void manual_mode(void)
 	enable_button(CAMERA_BUTTON);
 }
 
+//ADDED--------------------------
+void bluetooth_mode(void)
+{
+	disable_button(DOWN_BUTTON);
+	disable_button(LEFT_BUTTON);
+	disable_button(RIGHT_BUTTON);
+	disable_button(FIRE_BUTTON);
+	disable_button(CAMERA_BUTTON);
+	disable_button(UP_BUTTON);
+}
+
+//-------------------------------
+
 //===================================================================
 // Bluetooth Command Handlers
 //===================================================================
@@ -274,11 +298,16 @@ int main (void)
 	change_button_callback(MANUAL_BUTTON, mode_manual_callback);
 	change_button_callback(SECURITY_BUTTON, mode_security_callback);
 	change_button_callback(AUTOMATIC_BUTTON, mode_auto_callback);
+
+	//ADDED------------------------------------------------------------
+	change_button_callback(BLUETOOTH_BUTTON, mode_bluetooth_callback);
+	//-----------------------------------------------------------------
+
 	change_button_callback(FIRE_BUTTON, motor_fire);
 	change_button_callback(CAMERA_BUTTON, photo_callback);
 
 	// Init Bluetooth
-	bluetooth = 0;
+	bluetooth_value = 0;  //CHANGED
 	uint8_t *bluetooth_rx_message;
 	uint16_t message_size;
 
@@ -288,7 +317,7 @@ int main (void)
     {
 
 		process_user_input(USER_POLL);
-		if (bluetooth)
+		if (bluetooth_value) //CHANGED
 		{
 			message_size = bluetooth_receive_message_timeout(bluetooth_rx_message, USER_POLL);
 			if (message_size == 0)
@@ -313,6 +342,11 @@ int main (void)
 				auto_mode();
 				break;
 			}
+			//ADDED-------------
+			case BLUETOOTH:
+				bluetooth_mode();
+				break;
+			//------------------
 		}
     }
 }

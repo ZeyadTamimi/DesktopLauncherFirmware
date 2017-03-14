@@ -29,6 +29,9 @@ typedef enum button_type
 	manual,
 	automatic,
 	security,
+	//ADDED--------------
+	bluetooth,
+	//-------------------
 	fire,
 	camera,
 	left,
@@ -38,6 +41,9 @@ typedef enum button_type
 	manual_pressed,
 	automatic_pressed,
 	security_pressed,
+	//ADDED--------------
+	bluetooth_pressed,
+	//-------------------
 	fire_pressed,
 	camera_pressed,
 	left_pressed,
@@ -45,6 +51,8 @@ typedef enum button_type
 	down_pressed,
 	up_pressed
 } button_type;
+
+
 
 void init_palette();
 void print_image(unsigned char arr[320][240], int x_size, int y_size);
@@ -54,6 +62,10 @@ void clear_screen(void);
 void reticle(int colour);
 void write_processing_message(int message_colour);
 void erase_processing_message(void);
-void print_display(int arrow_colour, int menu_colour, int screen_colour,
-				  int reticle_colour, int fire_colour, int camera_colour);
+void print_display( int arrow_colour, 
+					int menu_colour, 
+					int screen_colour,
+					int reticle_colour, 
+					int fire_colour, 
+					int camera_colour);
 #endif /* GRAPHICS_H_ */

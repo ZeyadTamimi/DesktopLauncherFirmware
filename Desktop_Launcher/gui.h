@@ -4,15 +4,19 @@
 //===================================================================
 // Defines Function Declarations
 //===================================================================
+
 #define MANUAL_BUTTON 0
 #define AUTOMATIC_BUTTON 1
 #define SECURITY_BUTTON 2
-#define FIRE_BUTTON 3
-#define LEFT_BUTTON 4
-#define RIGHT_BUTTON 5
-#define UP_BUTTON 6
-#define DOWN_BUTTON 7
-#define CAMERA_BUTTON 8
+//ADDED----------------------
+#define BLUETOOTH_BUTTON 3
+//---------------------------
+#define FIRE_BUTTON 4   //CHANGED
+#define LEFT_BUTTON 5   //CHANGED
+#define RIGHT_BUTTON 6  //CHANGED
+#define UP_BUTTON 7     //CHANGED
+#define DOWN_BUTTON 8   //CHANGED
+#define CAMERA_BUTTON 9 //CHANGED
 
 typedef void (*function)();
 

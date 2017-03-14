@@ -14,9 +14,9 @@
 //===================================================================
 // Defines
 //===================================================================
-#define MAX_BUTTONS 9
-#define TOGGLEABLE_BUTTON_NUMBER 3
-#define MODE_BUTTON_NUMBER 3
+#define MAX_BUTTONS 10             //CHANGED
+#define TOGGLEABLE_BUTTON_NUMBER 4 //CHANGED
+#define MODE_BUTTON_NUMBER 4       //CHANGED
 
 
 //===================================================================
@@ -187,8 +187,8 @@ void init_gui(){
 
     // Button initialization code
     Button manual_button;
-    manual_button.x0 = 500;
-    manual_button.x1 = 580;
+    manual_button.x0 = 410; //CHANGED
+    manual_button.x1 = 490; //CHANGED
     manual_button.y0 = 10;
     manual_button.y1 = 50;
     manual_button.normal_button_type = manual;
@@ -200,8 +200,8 @@ void init_gui(){
     manual_button.disabled = 0;
 
     Button automatic_button;
-    automatic_button.x0 = 590;
-    automatic_button.x1 = 670;
+    automatic_button.x0 = 500; //CHANGED
+    automatic_button.x1 = 580; //CHANGED
     automatic_button.y0 = 10;
     automatic_button.y1 = 50;
     automatic_button.normal_button_type = automatic;
@@ -213,8 +213,8 @@ void init_gui(){
     automatic_button.disabled = 0;
 
     Button security_button;
-    security_button.x0 = 680;
-    security_button.x1 = 760;
+    security_button.x0 = 590; //CHANGED
+    security_button.x1 = 670; //CHANGED
     security_button.y0 = 10;
     security_button.y1 = 50;
     security_button.normal_button_type = security;
@@ -224,6 +224,21 @@ void init_gui(){
     security_button.toggled = 0;
     security_button.callback = NULL;
     security_button.disabled = 0;
+
+	//ADDED------------------------------
+	Button bluetooth_button;
+	bluetooth_button.x0 = 680;
+	bluetooth_button.x1 = 760;
+	bluetooth_button.y0 = 10;
+	bluetooth_button.y1 = 50;
+	bluetooth_button.normal_button_type = bluetooth;
+	bluetooth_button.normal_button_color = CYAN;
+	bluetooth_button..pressed_button_type = bluetooth_pressed;
+	bluetooth_button..pressed_button_color = WHITE;
+	bluetooth_button..toggled = 0;
+	bluetooth_button.callback = NULL;
+	bluetooth_button.disabled = 0;
+	//-----------------------------------
 
 
 	Button fire_button;
@@ -308,6 +323,11 @@ void init_gui(){
 	button_array[MANUAL_BUTTON] = manual_button;
 	button_array[AUTOMATIC_BUTTON] = automatic_button;
 	button_array[SECURITY_BUTTON] = security_button;
+
+	//ADDED-----------------------------------
+	button_array[BLUETOOTH_BUTTON] = bluetooth_button;
+	//----------------------------------------
+
 	button_array[FIRE_BUTTON] = fire_button;
 	button_array[LEFT_BUTTON] = left_button;
 	button_array[RIGHT_BUTTON] = right_button;
