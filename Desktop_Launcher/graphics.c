@@ -334,47 +334,59 @@ void draw_button(button_type button, int colour){
 		circle(215,430,2,RED);
 		break;
 	case(manual): 
-		rectangle(410,10,490,50,colour); 				 //CHANGED
-		OutGraphicsCharFont1(430,27,BLACK,colour,'M',0); //CHANGED
-		OutGraphicsCharFont1(438,27,BLACK,colour,'A',0); //CHANGED
-		OutGraphicsCharFont1(446,27,BLACK,colour,'N',0); //CHANGED
-		OutGraphicsCharFont1(454,27,BLACK,colour,'U',0); //CHANGED
-		OutGraphicsCharFont1(462,27,BLACK,colour,'A',0); //CHANGED
-		OutGraphicsCharFont1(470,27,BLACK,colour,'L',0); //CHANGED
+		rectangle(500,10,580,50,colour); 				 
+		OutGraphicsCharFont1(520,27,BLACK,colour,'M',0); 
+		OutGraphicsCharFont1(528,27,BLACK,colour,'A',0); 
+		OutGraphicsCharFont1(536,27,BLACK,colour,'N',0); 
+		OutGraphicsCharFont1(544,27,BLACK,colour,'U',0); 
+		OutGraphicsCharFont1(552,27,BLACK,colour,'A',0); 
+		OutGraphicsCharFont1(560,27,BLACK,colour,'L',0);
 		break;
 
 	case(automatic):
-		rectangle(500,10,580,50,colour);                 //CHANGED
-		OutGraphicsCharFont1(528,27,BLACK,colour,'A',0); //CHANGED
-		OutGraphicsCharFont1(534,27,BLACK,colour,'U',0); //CHANGED
-		OutGraphicsCharFont1(542,27,BLACK,colour,'T',0); //CHANGED
-		OutGraphicsCharFont1(550,27,BLACK,colour,'O',0); //CHANGED
+		rectangle(590,10,670,50,colour);                 
+		OutGraphicsCharFont1(618,27,BLACK,colour,'A',0); 
+		OutGraphicsCharFont1(624,27,BLACK,colour,'U',0); 
+		OutGraphicsCharFont1(632,27,BLACK,colour,'T',0); 
+		OutGraphicsCharFont1(640,27,BLACK,colour,'O',0); 
 		break;
 
 	case(security):
-		rectangle(590,10,670,50,colour);                 //CHANGED
-		OutGraphicsCharFont1(602,27,BLACK,colour,'S',0); //CHANGED
-		OutGraphicsCharFont1(610,27,BLACK,colour,'E',0); //CHANGED
-		OutGraphicsCharFont1(618,27,BLACK,colour,'C',0); //CHANGED
-		OutGraphicsCharFont1(626,27,BLACK,colour,'U',0); //CHANGED
-		OutGraphicsCharFont1(634,27,BLACK,colour,'R',0); //CHANGED
-		OutGraphicsCharFont1(642,27,BLACK,colour,'I',0); //CHANGED
-		OutGraphicsCharFont1(650,27,BLACK,colour,'T',0); //CHANGED
-		OutGraphicsCharFont1(658,27,BLACK,colour,'Y',0); //CHANGED
+		rectangle(680,10,760,50,colour);                
+		OutGraphicsCharFont1(692,27,BLACK,colour,'S',0);
+		OutGraphicsCharFont1(700,27,BLACK,colour,'E',0);
+		OutGraphicsCharFont1(708,27,BLACK,colour,'C',0);
+		OutGraphicsCharFont1(716,27,BLACK,colour,'U',0);
+		OutGraphicsCharFont1(724,27,BLACK,colour,'R',0);
+		OutGraphicsCharFont1(732,27,BLACK,colour,'I',0);
+		OutGraphicsCharFont1(740,27,BLACK,colour,'T',0);
+		OutGraphicsCharFont1(748,27,BLACK,colour,'Y',0);
 		break;
 
 	//ADDED-----------------------------------------------
 	case(bluetooth):
-		rectangle(680,10,760,50,colour);
-		OutGraphicsCharFont1(688,27,BLACK,colour,'B',0);
-		OutGraphicsCharFont1(694,27,BLACK,colour,'L',0);
-		OutGraphicsCharFont1(704,27,BLACK,colour,'U',0);
-		OutGraphicsCharFont1(712,27,BLACK,colour,'E',0);
-		OutGraphicsCharFont1(720,27,BLACK,colour,'T',0);
-		OutGraphicsCharFont1(728,27,BLACK,colour,'O',0);
-		OutGraphicsCharFont1(736,27,BLACK,colour,'O',0);
-		OutGraphicsCharFont1(744,27,BLACK,colour,'T',0);
-		OutGraphicsCharFont1(752,27,BLACK,colour,'H',0);
+	
+		circle(50,50,30,colour);
+		
+		line(49,25,49,75,BLACK);
+		line(50,25,50,75,BLACK);
+		line(51,25,51,75,BLACK);
+
+		line(35,34,65,64,BLACK);
+		line(35,35,65,65,BLACK);
+		line(35,36,65,66,BLACK);
+
+		line(35,64,65,34,BLACK);
+		line(35,65,65,35,BLACK);
+		line(35,66,65,36,BLACK);
+
+		line(65,64,50,74,BLACK);
+		line(65,65,50,75,BLACK);
+		line(65,66,50,76,BLACK);
+
+		line(65,34,50,24,BLACK);
+		line(65,35,50,25,BLACK);
+		line(65,36,50,26,BLACK);
 
 	//----------------------------------------------------
 
