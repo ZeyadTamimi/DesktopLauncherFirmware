@@ -73,13 +73,17 @@ void init_motors(void)
 
 void move_direction(int direction)
 {
+	int x;
 	switch(direction)
 	{
 	case MOVE_UP:
-		move_up();
+		for (x = 0; x < 15; x++)
+			move_up();
 		break;
 	case MOVE_DOWN:
-		move_down();
+		for (x = 0; x < 15; x++)
+			move_down();
+		break;
 		break;
 	case MOVE_LEFT:
 		move_left();

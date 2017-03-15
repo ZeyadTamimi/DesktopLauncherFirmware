@@ -4,27 +4,27 @@
 #include<stdint.h>
 
 // Message IDs
-#define MOVE_COMMAND_TIME_ID 0x01
-#define MOVE_COMMAND_ANGLE_ID 0x02
-#define MOVE_COMMAND_CHANGE_SPEED 0x03
-#define IMAGE_REQUEST 0x10
-#define RESPONSE_ID 0xF1
-#define IMAGE_ID 0xF2
+// Commands
+#define ID_COMMAND_MOVE_TIME 0x01
+#define ID_COMMAND_MOVE_ANGLE 0x02
+#define ID_COMMAND_CHANGE_SPEED 0x03
+#define ID_COMMAND_FIRE 0x04
+#define ID_RESPONSE 0xAA
+#define ID_REQUEST 0xF1
+#define ID_MESG_IMAGE 0xF2
 
 // Field Sizes
-#define MESG_FIELD_ID_SIZE 1
-#define MESG_FIELD_LENGTH_SIZE 2
-#define MESG_FIELD_HEADER_SIZE MESG_FIELD_ID_SIZE+MESG_FIELD_LENGTH_SIZE
-#define MESG_MOVE_FIELD_DIR_SIZE 1
-// Response IDs
+#define SIZE_FIELD_ID 1
+#define SIZE_FIELD_LENGTH 2
+#define SIZE_FIELD_HEADER (SIZE_FIELD_ID + SIZE_FIELD_LENGTH)
+#define SIZE_FIELD_COMMAND_MOVE_DIR 1
+#define SIZE_FIELD_COMMAND_MOVE_TIME 4
+
+// Response Codes
 #define RESPONSE_NO_ERROR 0
 #define RESPONSE_INVALID_PARAM 1
-
-// Message Lengths
-#define MOVE_COMMAND_TIME_LENGTH 4
-
-#define BUFFER_SIZE 256
-unsigned char in_buffer[BUFFER_SIZE];
+#define RESPONSE_INVALID_COMMAND 2
+#define RESPONSE_INVALID_REQUEST 3
 
 void bluetooth_main(void);
 void init_bluetooth(void);

@@ -11,7 +11,12 @@
 //===================================================================
 // Defines
 //===================================================================
+#define BUFFER_SIZE 256
 
+//===================================================================
+// Constants
+//===================================================================
+unsigned char in_buffer[BUFFER_SIZE];
 
 //===================================================================
 // Private Function Definitions
@@ -131,15 +136,15 @@ int bluetooth_receive_message_timeout(uint8_t **message_buffer, unsigned long ti
 	}
 
 	uint16_t size = in_buffer[1]<<8 | in_buffer[2];
-	serial_read(BLUETOOTH, in_buffer, size);
+	read_bytes += serial_read(BLUETOOTH, in_buffer + read_bytes, size);
 	*message_buffer = in_buffer;
-	return 1;
+	return read_bytes;
 }
 
 void bluetooth_send_response(uint8_t response_message_id, uint8_t response_code)
 {
 	uint8_t out_buffer[5];
-	out_buffer[0] = RESPONSE_ID;
+	out_buffer[0] = ID_RESPONSE;
 	out_buffer[1] = 0;
 	out_buffer[2] = 2;
 	out_buffer[3] = response_message_id;
@@ -150,7 +155,7 @@ void bluetooth_send_response(uint8_t response_message_id, uint8_t response_code)
 void bluetooth_send_image(uint8_t *image_data, uint16_t image_size)
 {
 	uint8_t out_buffer[3];
-	out_buffer[0] = IMAGE_ID;
+	out_buffer[0] = ID_MESG_IMAGE;
 	out_buffer[1] = image_size>>8;
 	out_buffer[2] = image_size & 0xFF;
 	serial_write(BLUETOOTH, out_buffer, 3);

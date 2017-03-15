@@ -34,10 +34,7 @@ typedef enum desktop_launcher_mode
 {
 	MANUAL= 0x00,
 	AUTO = 0x01,
-	SECURITY = 0x02,
-	//ADDED---------
-	BLUETOOTH = 0x03
-	//--------------
+	SECURITY = 0x02
 }desktop_launcher_mode;
 
 volatile desktop_launcher_mode current_mode;
@@ -61,14 +58,6 @@ void mode_auto_callback()
 {
 	current_mode = AUTO;
 }
-
-//ADDED-------------------------
-void mode_bluetooth_callback()
-{
-	current_mode = BLUETOOTH;
-}
-//------------------------------
-
 
 void photo_callback()
 {
@@ -211,10 +200,10 @@ uint8_t move_command_time(uint8_t *bluetooth_rx_message, uint16_t size)
 	uint32_t wait_time = 0;
 	// Retrieve the wait time
 	int byte_index;
-	for (byte_index = 0; byte_index < MOVE_COMMAND_TIME_LENGTH; byte_index++)
-		wait_time |= bluetooth_rx_message[MESG_FIELD_HEADER_SIZE + MESG_MOVE_FIELD_DIR_SIZE + byte_index] << (8 * (3 - byte_index));
+	for (byte_index = 0; byte_index < SIZE_FIELD_COMMAND_MOVE_TIME; byte_index++)
+		wait_time |= bluetooth_rx_message[SIZE_FIELD_HEADER + SIZE_FIELD_COMMAND_MOVE_DIR + byte_index] << (8 * (3 - byte_index));
 	// Get the direction
-	uint8_t direction = bluetooth_rx_message[MESG_FIELD_HEADER_SIZE];
+	uint8_t direction = bluetooth_rx_message[SIZE_FIELD_HEADER];
 	if (direction > MOVE_DOWN)
 		return RESPONSE_INVALID_PARAM;
 	// Move the motor
@@ -227,54 +216,72 @@ uint8_t move_command_time(uint8_t *bluetooth_rx_message, uint16_t size)
 uint8_t set_motor_speed_command(uint8_t *bluetooth_rx_message, uint16_t size)
 {
 	// TODO Add size check
-	uint8_t new_speed = bluetooth_rx_message[MESG_FIELD_HEADER_SIZE];
+	uint8_t new_speed = bluetooth_rx_message[SIZE_FIELD_HEADER];
 	if (new_speed)
 		return RESPONSE_INVALID_PARAM;
 	set_motor_speed(new_speed);
 	return RESPONSE_NO_ERROR;
 }
 
+void send_image_capture()
+{
+	uint8_t * jpeg_photo_buffer = NULL;
+	take_picture();
+	uint32_t photo_size = read_full_picture(&jpeg_photo_buffer);
+	if (photo_size == 0)
+	{
+		printf("ERROR, CANT TAKE MANUAL PHOTO!");
+		return;
+	}
+	resume_picture();
+	printf("Image size is %ld\n", photo_size);
+	bluetooth_send_image(jpeg_photo_buffer, photo_size);
+	free(jpeg_photo_buffer);
+}
 
-int handle_command(uint8_t *bluetooth_rx_message, uint16_t size)
+
+void handle_command(uint8_t *bluetooth_rx_message, uint16_t size)
 {
 	uint8_t response_code;
+
 	// Handle Command Messages
 	switch (bluetooth_rx_message[0])
 	{
-		case (MOVE_COMMAND_TIME_ID) :
+		case ID_COMMAND_MOVE_TIME:
 			response_code = move_command_time(bluetooth_rx_message, size);
 			break;
-		case (MOVE_COMMAND_CHANGE_SPEED) :
+		case ID_COMMAND_CHANGE_SPEED:
 			response_code = set_motor_speed_command(bluetooth_rx_message, size);
 			break;
+		case ID_COMMAND_FIRE:
+			motor_fire();
+			break;
 		default :
-			// TODO Function that sends message undefined!
-			// TODO returned
+			response_code = RESPONSE_INVALID_COMMAND;
 			break;
 	}
 
-	// TODO Function that sends the response message
+	bluetooth_send_response(bluetooth_rx_message[0], response_code);
 }
 
-int handle_request(uint8_t *bluetooth_rx_message, uint16_t size)
+void handle_request(uint8_t *bluetooth_rx_message, uint16_t size)
 {
 	// Handle Command Messages
-	switch (bluetooth_rx_message[0])
+	switch (bluetooth_rx_message[3])
 	{
-		case (IMAGE_REQUEST) :
-			// TODO Make function that handles this AND sends the reply
+		case ID_MESG_IMAGE:
+			send_image_capture();
+			break;
 		default :
-			// TODO Function that sends message undefined!
-			// TODO returned
+			bluetooth_send_response(bluetooth_rx_message[0], RESPONSE_INVALID_REQUEST);
 			break;
 	}
 }
 
 
-int main (void)
+int main(void)
 {
 
-	init_wifi();
 	// Mode Initialization
 	current_mode = MANUAL;
 	// Initialize the camera
@@ -288,7 +295,6 @@ int main (void)
 	// Init the motors
 	init_motors();
 	set_motor_speed(DEFAULT_MOTOR_SPEED);
-	motor_test();
 
     // Gui init code
 	init_gui();
@@ -301,36 +307,41 @@ int main (void)
 	change_button_callback(AUTOMATIC_BUTTON, mode_auto_callback);
 
 	//ADDED------------------------------------------------------------
-	change_button_callback(BLUETOOTH_BUTTON, mode_bluetooth_callback);
+	// TODO Add Bluetooth Callback
 	//-----------------------------------------------------------------
 
 	change_button_callback(FIRE_BUTTON, motor_fire);
 	change_button_callback(CAMERA_BUTTON, photo_callback);
 
 	// Init Bluetooth
-	bluetooth_value = 0;  //CHANGED
+	bluetooth_value = 1;
+	init_bluetooth();
 	uint8_t *bluetooth_rx_message;
 	uint16_t message_size;
 
 
+
 	// Main loop
+	printf("IN MAIN!\n");
     while (1)
     {
 
-		process_user_input(USER_POLL);
+		//process_user_input(USER_POLL);
 		if (bluetooth_value) //CHANGED
 		{
-			message_size = bluetooth_receive_message_timeout(bluetooth_rx_message, USER_POLL);
+			message_size = bluetooth_receive_message_timeout(&bluetooth_rx_message, USER_POLL);
 			if (message_size == 0)
 				continue;
 
-			if (bluetooth_rx_message[0] < 0x10)
-				handle_command(bluetooth_rx_message, message_size);
-			else
+			if (bluetooth_rx_message[0] == ID_REQUEST)
 				handle_request(bluetooth_rx_message, message_size);
+			else
+				handle_command(bluetooth_rx_message, message_size);
+
 		}
 		else
 		{
+			process_user_input(USER_POLL);
 			switch (current_mode)
 			{
 			case SECURITY:
@@ -343,11 +354,6 @@ int main (void)
 				auto_mode();
 				break;
 			}
-			//ADDED-------------
-			case BLUETOOTH:
-				bluetooth_mode();
-				break;
-			//------------------
 		}
     }
 }
