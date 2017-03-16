@@ -12,6 +12,7 @@
 #define ID_RESPONSE 0xAA
 #define ID_REQUEST 0xF1
 #define ID_MESG_IMAGE 0xF2
+#define ID_ANDROID_HANDSHAKE 0xFF
 
 // Field Sizes
 #define SIZE_FIELD_ID 1
@@ -25,6 +26,7 @@
 #define RESPONSE_INVALID_PARAM 1
 #define RESPONSE_INVALID_COMMAND 2
 #define RESPONSE_INVALID_REQUEST 3
+#define RESPONSE_NIOS_HANDSHAKE 4
 
 void bluetooth_main(void);
 void init_bluetooth(void);

@@ -23,6 +23,7 @@
 #define MANUAL_POLL 100000
 #define AUTO_POLL 100000
 #define USER_POLL 50000
+#define BLUETOOTH_INITIAL_POLL 5000000
 
 // Motor Speeds
 #define DEFAULT_MOTOR_SPEED 2
@@ -38,7 +39,7 @@ typedef enum desktop_launcher_mode
 }desktop_launcher_mode;
 
 volatile desktop_launcher_mode current_mode;
-volatile int bluetooth_value;  //CHANGED
+volatile int bluetooth_enabled;
 
 //===================================================================
 // Callbacks
@@ -93,6 +94,21 @@ void photo_callback()
 	resume_picture();
 	free(jpeg_photo_buffer);
 	erase_processing_message();
+}
+
+void bluetooth_callback(void)
+{
+	bluetooth_enabled = 1;
+	disable_button(BLUETOOTH_BUTTON);
+	disable_button(DOWN_BUTTON);
+	disable_button(LEFT_BUTTON);
+	disable_button(RIGHT_BUTTON);
+	disable_button(FIRE_BUTTON);
+	disable_button(CAMERA_BUTTON);
+	disable_button(UP_BUTTON);
+	disable_button(MANUAL_BUTTON);
+	disable_button(AUTOMATIC_BUTTON);
+	disable_button(SECURITY_BUTTON);
 }
 
 //===================================================================
@@ -178,18 +194,24 @@ void manual_mode(void)
 	enable_button(CAMERA_BUTTON);
 }
 
-//ADDED--------------------------
-void bluetooth_mode(void)
-{
-	disable_button(DOWN_BUTTON);
-	disable_button(LEFT_BUTTON);
-	disable_button(RIGHT_BUTTON);
-	disable_button(FIRE_BUTTON);
-	disable_button(CAMERA_BUTTON);
-	disable_button(UP_BUTTON);
-}
 
-//-------------------------------
+//===================================================================
+// Utility Functions
+//===================================================================
+void disable_bluetooth(void)
+{
+	bluetooth_enabled = 0;
+	enable_button(BLUETOOTH_BUTTON);
+	enable_button(DOWN_BUTTON);
+	enable_button(LEFT_BUTTON);
+	enable_button(RIGHT_BUTTON);
+	enable_button(FIRE_BUTTON);
+	enable_button(CAMERA_BUTTON);
+	enable_button(UP_BUTTON);
+	enable_button(MANUAL_BUTTON);
+	enable_button(AUTOMATIC_BUTTON);
+	enable_button(SECURITY_BUTTON);
+}
 
 //===================================================================
 // Bluetooth Command Handlers
@@ -255,6 +277,7 @@ void handle_command(uint8_t *bluetooth_rx_message, uint16_t size)
 			break;
 		case ID_COMMAND_FIRE:
 			motor_fire();
+			response_code = RESPONSE_NO_ERROR;
 			break;
 		default :
 			response_code = RESPONSE_INVALID_COMMAND;
@@ -305,16 +328,13 @@ int main(void)
 	change_button_callback(MANUAL_BUTTON, mode_manual_callback);
 	change_button_callback(SECURITY_BUTTON, mode_security_callback);
 	change_button_callback(AUTOMATIC_BUTTON, mode_auto_callback);
-
-	//ADDED------------------------------------------------------------
-	// TODO Add Bluetooth Callback
-	//-----------------------------------------------------------------
+	change_button_callback(BLUETOOTH_BUTTON, bluetooth_callback);
 
 	change_button_callback(FIRE_BUTTON, motor_fire);
 	change_button_callback(CAMERA_BUTTON, photo_callback);
 
 	// Init Bluetooth
-	bluetooth_value = 1;
+	bluetooth_enabled = 0;
 	init_bluetooth();
 	uint8_t *bluetooth_rx_message;
 	uint16_t message_size;
@@ -325,23 +345,44 @@ int main(void)
 	printf("IN MAIN!\n");
     while (1)
     {
-
-		//process_user_input(USER_POLL);
-		if (bluetooth_value) //CHANGED
+		if (bluetooth_enabled)
 		{
-			message_size = bluetooth_receive_message_timeout(&bluetooth_rx_message, USER_POLL);
-			if (message_size == 0)
+			flush_buffer();
+			message_size = bluetooth_receive_message_timeout(&bluetooth_rx_message, BLUETOOTH_INITIAL_POLL);
+			if (message_size != 3 || bluetooth_rx_message[0] != ID_ANDROID_HANDSHAKE)
+			{
+				disable_bluetooth();
 				continue;
+			}
 
-			if (bluetooth_rx_message[0] == ID_REQUEST)
-				handle_request(bluetooth_rx_message, message_size);
-			else
-				handle_command(bluetooth_rx_message, message_size);
+			bluetooth_send_response(ID_ANDROID_HANDSHAKE, RESPONSE_NIOS_HANDSHAKE);
 
+			while(1)
+			{
+				message_size = bluetooth_receive_message_timeout(&bluetooth_rx_message, BLUETOOTH_INITIAL_POLL);
+				if (message_size == 0)
+				{
+					if(!bluetooth_connected())
+					{
+						disable_bluetooth();
+						break;
+					}
+					continue;
+				}
+
+				if (bluetooth_rx_message[0] == ID_REQUEST)
+					handle_request(bluetooth_rx_message, message_size);
+				else
+					handle_command(bluetooth_rx_message, message_size);
+			}
 		}
 		else
 		{
 			process_user_input(USER_POLL);
+
+			if(bluetooth_enabled)
+				continue;
+
 			switch (current_mode)
 			{
 			case SECURITY:

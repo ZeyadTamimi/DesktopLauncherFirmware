@@ -25,7 +25,6 @@ void get_cmd_response(size_t size)
 {
 	serial_read(BLUETOOTH, in_buffer, size);
 	in_buffer[size] = '\0';
-	printf("[%s]\n", in_buffer);
 }
 
 void flush_buffer(void)
@@ -36,14 +35,12 @@ void flush_buffer(void)
 
 void enter_cmd_mode(void)
 {
-	printf("enter command mode");
 	serial_write(BLUETOOTH, "$$$", 3);
 	get_cmd_response(5);
 }
 
 void exit_cmd_mode(void)
 {
-	printf("exit command mode");
 	serial_write(BLUETOOTH, "---\r\n", 5);
 	get_cmd_response(5);
 }
@@ -51,25 +48,21 @@ void exit_cmd_mode(void)
 
 void set_name(void)
 {
-	printf("bluetooth: set name");
 	serial_write(BLUETOOTH, "SN,DTL\r\n", 8);
 	get_cmd_response(5);
 }
 
 void set_pin(void)
 {
-	printf("bluetooth: set auth mode");
 	serial_write(BLUETOOTH, "SA,4\r\n", 6);
 	get_cmd_response(5);
 	usleep(1000);
-	printf("bluetooth: set pin");
 	serial_write(BLUETOOTH, "SP,9999\r\n", 9);
 	get_cmd_response(5);
 }
 
 int check_connection(void)
 {
-	printf("bluetooth: get status");
 	serial_write(BLUETOOTH, "GK\r\n", 4);
 	get_cmd_response(7);
 
@@ -83,37 +76,6 @@ int check_connection(void)
 //===================================================================
 // Public Function Definitions
 //===================================================================
-void bluetooth_main(void)
-{
-	printf("bluetooth alive\n");
-	init_bluetooth();
-
-	int i = 0;
-
-	while(!i) {
-		printf("connected: [%d]", bluetooth_connected());
-		scanf("%d", &i);
-	}
-
-//	uint8_t out[5];
-//	for(i=0;i<5;i++) {
-//		out[i]=i+1;
-//	}
-//
-//	i=0;
-//	while(!i) {
-//		serial_write(BLUETOOTH, out, 5);
-//		scanf("%d", &i);
-//	}
-
-	i=0;
-	uint8_t big[35000];
-	while(!i) {
-		serial_read(BLUETOOTH, big, 35000);
-		printf("done");
-	}
-}
-
 void init_bluetooth(void)
 {
 	flush_buffer();
@@ -136,7 +98,8 @@ int bluetooth_receive_message_timeout(uint8_t **message_buffer, unsigned long ti
 	}
 
 	uint16_t size = in_buffer[1]<<8 | in_buffer[2];
-	read_bytes += serial_read(BLUETOOTH, in_buffer + read_bytes, size);
+	if (size != 0)
+		read_bytes += serial_read(BLUETOOTH, in_buffer + read_bytes, size);
 	*message_buffer = in_buffer;
 	return read_bytes;
 }

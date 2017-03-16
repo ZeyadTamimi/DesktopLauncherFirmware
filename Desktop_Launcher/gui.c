@@ -14,9 +14,9 @@
 //===================================================================
 // Defines
 //===================================================================
-#define MAX_BUTTONS 10             //CHANGED
-#define TOGGLEABLE_BUTTON_NUMBER 4 //CHANGED
-#define MODE_BUTTON_NUMBER 4       //CHANGED
+#define MAX_BUTTONS 10
+#define TOGGLEABLE_BUTTON_NUMBER 3
+#define MODE_BUTTON_NUMBER 3
 
 
 //===================================================================
@@ -159,7 +159,7 @@ void process_user_input(int timeout_usec)
 		if (pressed_button->disabled)
 			break;
 
-		if(pressed_button->toggled == 0)
+		if (pressed_button->toggled == 0)
 		{
 			draw_button(pressed_button->pressed_button_type, pressed_button->pressed_button_color);
 			pressed_button->toggled = 1;
@@ -167,7 +167,6 @@ void process_user_input(int timeout_usec)
 
 		if (pressed_button->callback != NULL)
 			pressed_button->callback();
-
 	} while( pressed_button_index != -1);
 
 	if (pressed_button_index != -1 || prev_pressed_button_index != -1)
@@ -188,7 +187,7 @@ void init_gui(){
     // Button initialization code
     Button manual_button;
     manual_button.x0 = 500;
-    manual_button.x1 = 480;
+    manual_button.x1 = 580;
     manual_button.y0 = 10;
     manual_button.y1 = 50;
     manual_button.normal_button_type = manual;
@@ -225,7 +224,6 @@ void init_gui(){
     security_button.callback = NULL;
     security_button.disabled = 0;
 
-	//ADDED------------------------------
 	Button bluetooth_button;
 	bluetooth_button.x0 = 20;
 	bluetooth_button.x1 = 70;
@@ -238,8 +236,6 @@ void init_gui(){
 	bluetooth_button.toggled = 0;
 	bluetooth_button.callback = NULL;
 	bluetooth_button.disabled = 0;
-	//-----------------------------------
-
 
 	Button fire_button;
 	fire_button.x0 = 580;

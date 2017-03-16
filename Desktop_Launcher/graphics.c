@@ -326,12 +326,21 @@ void draw_button(button_type button, int colour){
 		break;
 
 	case(camera):
-		circle(200,440,30,colour);
-		rectangle(180,425,220,455,GREY);
-		circle(200,440,10,BLACK);
-		circle(200,440,8,WHITE);
-		rectangle(185,420,195,425,BLACK);
-		circle(215,430,2,RED);
+		if(colour == GREY) {
+			circle(200,440,30,GREY);
+			rectangle(180,425,220,455,BLACK);
+			circle(200,440,10,WHITE);
+			circle(200,440,8,BLACK);
+			rectangle(185,420,195,425,WHITE);
+			circle(215,430,2,WHITE);
+		} else {
+			circle(200,440,30,colour);
+			rectangle(180,425,220,455,GREY);
+			circle(200,440,10,BLACK);
+			circle(200,440,8,WHITE);
+			rectangle(185,420,195,425,BLACK);
+			circle(215,430,2,RED);
+		}
 		break;
 	case(manual): 
 		rectangle(500,10,580,50,colour); 				 

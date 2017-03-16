@@ -13,8 +13,8 @@
 //===================================================================
 // Motor Limits
 //===================================================================
-#define kCW180_MAX 5500
-#define kCW180_MIN 2500
+#define kCW180_MAX 5000
+#define kCW180_MIN 2800
 #define kCW180_MID 3900
 
 #define kCWFIRE_MAX 5750
@@ -22,7 +22,7 @@
 #define kCWFIRE_MID 3000
 
 #define kRANGE360 32
-#define kCW360_MID 4128
+#define kCW360_MID 4111
 #define kCW360_MAX (kCW360_MID + kRANGE360)
 #define kCW360_MIN (kCW360_MID - kRANGE360)
 
@@ -35,6 +35,8 @@
 //===================================================================
 unsigned short updown_speed;
 unsigned short leftright_speed;
+int bluetooth_enabled = 0;
+int bluetooth_multiplier = 15;
 
 //===================================================================
 // Private Function Definitions
@@ -73,17 +75,15 @@ void init_motors(void)
 
 void move_direction(int direction)
 {
+	bluetooth_enabled = 1;
 	int x;
 	switch(direction)
 	{
 	case MOVE_UP:
-		for (x = 0; x < 15; x++)
-			move_up();
+		move_up();
 		break;
 	case MOVE_DOWN:
-		for (x = 0; x < 15; x++)
-			move_down();
-		break;
+		move_down();
 		break;
 	case MOVE_LEFT:
 		move_left();
@@ -92,6 +92,8 @@ void move_direction(int direction)
 		move_right();
 		break;
 	}
+
+	bluetooth_enabled = 0;
 }
 
 
@@ -99,7 +101,10 @@ void move_up(void)
 {
     if (PWM_CW180 > kCW180_MIN)
     {
-        PWM_CW180 -= updown_speed;
+        if(bluetooth_enabled)
+            PWM_CW180 -= updown_speed * bluetooth_multiplier;
+        else
+            PWM_CW180 -= updown_speed;
         PWM_CW180 = PWM_CW180 > kCW180_MIN ? PWM_CW180 : kCW180_MIN;
         assert(PWM_CW180 >= kCW180_MIN);
     }
@@ -109,7 +114,10 @@ void move_down(void)
 {
     if (PWM_CW180 < kCW180_MAX)
     {
-        PWM_CW180 += updown_speed;
+        if(bluetooth_enabled)
+            PWM_CW180 += updown_speed * bluetooth_multiplier;
+        else
+            PWM_CW180 += updown_speed;
         PWM_CW180 = PWM_CW180 < kCW180_MAX ? PWM_CW180 : kCW180_MAX;
         assert(PWM_CW180 <= kCW180_MAX);
     }
