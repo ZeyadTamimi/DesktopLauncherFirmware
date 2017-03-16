@@ -454,6 +454,32 @@ void draw_button(button_type button, int colour){
 			OutGraphicsCharFont1(748,27,BLACK,colour,'Y',0);
 			break;
 
+	//ADDED-----------------------------------------------
+	case(bluetooth_pressed):
+	
+		circle(50,50,27,colour);
+		
+		line(49,25,49,75,BLACK);
+		line(50,25,50,75,BLACK);
+		line(51,25,51,75,BLACK);
+
+		line(35,34,65,64,BLACK);
+		line(35,35,65,65,BLACK);
+		line(35,36,65,66,BLACK);
+
+		line(35,64,65,34,BLACK);
+		line(35,65,65,35,BLACK);
+		line(35,66,65,36,BLACK);
+
+		line(65,64,50,74,BLACK);
+		line(65,65,50,75,BLACK);
+		line(65,66,50,76,BLACK);
+
+		line(65,34,50,24,BLACK);
+		line(65,35,50,25,BLACK);
+		line(65,36,50,26,BLACK);
+
+	//----------------------------------------------------
 	case(up_pressed):
 		up_triangle(UARROW_X1 + 12,UARROW_Y1-6,ARROW_LENGTH - 24,colour);
 		break;
