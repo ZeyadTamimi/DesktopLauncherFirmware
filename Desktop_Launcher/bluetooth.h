@@ -34,6 +34,7 @@ int bluetooth_receive_message_timeout(uint8_t **message_buffer, unsigned long ti
 void bluetooth_send_response(uint8_t response_message_id, uint8_t response_code);
 void bluetooth_send_image(uint8_t *image_data, uint16_t image_size);
 int bluetooth_connected(void);
+void flush_buffer(void);
 
 
 #endif /* BLUETOOTH_H_ */

@@ -37,6 +37,8 @@ unsigned short updown_speed;
 unsigned short leftright_speed;
 int bluetooth_enabled = 0;
 int bluetooth_multiplier = 15;
+int up_multiplier = 1;
+int down_multiplier = 1;
 
 //===================================================================
 // Private Function Definitions
@@ -102,7 +104,11 @@ void move_up(void)
     if (PWM_CW180 > kCW180_MIN)
     {
         if(bluetooth_enabled)
-            PWM_CW180 -= updown_speed * bluetooth_multiplier;
+        {
+            PWM_CW180 -= updown_speed * bluetooth_multiplier * up_multiplier;
+            up_multiplier = 1;
+            down_multiplier = 3;
+        }
         else
             PWM_CW180 -= updown_speed;
         PWM_CW180 = PWM_CW180 > kCW180_MIN ? PWM_CW180 : kCW180_MIN;
@@ -115,7 +121,11 @@ void move_down(void)
     if (PWM_CW180 < kCW180_MAX)
     {
         if(bluetooth_enabled)
-            PWM_CW180 += updown_speed * bluetooth_multiplier;
+        {
+            PWM_CW180 += updown_speed * bluetooth_multiplier * down_multiplier;
+        	up_multiplier = 3;
+        	down_multiplier = 1;
+        }
         else
             PWM_CW180 += updown_speed;
         PWM_CW180 = PWM_CW180 < kCW180_MAX ? PWM_CW180 : kCW180_MAX;
