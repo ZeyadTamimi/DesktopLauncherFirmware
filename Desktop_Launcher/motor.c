@@ -170,10 +170,10 @@ void move_right(void)
 
 void move_updown_angle(int16_t angle)
 {
-	if (angle < -360)
-		angle = -360;
-	else if (angle > 360)
-		angle = 360;
+	if (angle < -180)
+		angle = -180;
+	else if (angle > 180)
+		angle = 180;
 
 	int32_t PWM_NEW = PWM_CW180;
 	PWM_NEW = PWM_NEW - angle * UP_DOWN_ANGLE_PWM;
@@ -193,10 +193,10 @@ void move_updown_angle(int16_t angle)
 
 void move_leftright_angle(int16_t angle)
 {
-	if (angle < -360)
-		angle = -360;
-	else if (angle > 360)
-		angle = 360;
+	if (angle < -90)
+		angle = -90;
+	else if (angle > 90)
+		angle = 90;
 
 	if (angle > 0)
 	{

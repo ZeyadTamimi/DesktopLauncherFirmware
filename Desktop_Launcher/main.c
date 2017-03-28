@@ -276,10 +276,10 @@ uint8_t set_motor_speed_command(uint8_t *bluetooth_rx_message, uint16_t size)
 
 uint8_t move_command_angle(uint8_t *bluetooth_rx_message, uint16_t size)
 {
-	// TODO Add size check
 	int8_t angle_x = bluetooth_rx_message[SIZE_FIELD_HEADER];
 	int8_t angle_y = bluetooth_rx_message[SIZE_FIELD_HEADER + SIZE_FIELD_COMMAND_MOVE_ANGLE_X];
-	// TODO CALL KONRAD's STUFF
+	move_leftright_angle((uint16_t) angle_x);
+	move_updown_angle((uint16_t) angle_y);
 	return RESPONSE_NO_ERROR;
 }
 
