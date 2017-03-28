@@ -76,6 +76,13 @@ int check_connection(void)
 //===================================================================
 // Public Function Definitions
 //===================================================================
+void bluetooth_main(void)
+{
+	enter_cmd_mode();
+	printf("cmd mode");
+	while(1);
+}
+
 void init_bluetooth(void)
 {
 	flush_buffer();

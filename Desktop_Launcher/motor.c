@@ -235,6 +235,12 @@ void set_motor_speed(int speed_multiplier)
     leftright_speed = speed_multiplier;
 }
 
+int get_motor_speed()
+{
+	return leftright_speed;
+}
+
+
 // Use this to debug!
 void set_direct_PWM(int motor, int pwm_counter)
 {

@@ -25,6 +25,7 @@ void motor_load(void);
 void motor_fire(void);
 // use around 1 - 9
 void set_motor_speed(int speed_multiplier);
+int get_motor_speed();
 
 // Use this to debug
 // motor - 0 for updown

@@ -35,6 +35,7 @@
 #define CONFIG_UART_MOTION 0x01
 #define CONFIG_ACTIVE_MOTION 0x01
 #define COMMAND_MOTION_DETECTED 0x39
+#define COMMAND_SET_PORT 0x24
 // Constants
 #define CAMERA_BUFFER_SIZE 100
 #define CAMERADELAY 10
@@ -319,18 +320,30 @@ uint32_t read_full_picture(uint8_t ** jpeg_buffer)
 	if (*jpeg_buffer == NULL)
 		return 0;
 
-	while (remaining_length > 64)
+	while (remaining_length > 128)
 	{
 		// read 64 bytes at a time;
-		if (!read_picture_to_ptr(*jpeg_buffer, 64))
+		if (!read_picture_to_ptr(*jpeg_buffer, 128))
 			printf("ERROR!\n");
-		remaining_length -= 64;
+		remaining_length -= 128;
 	}
 
 	read_picture_to_ptr(*jpeg_buffer, remaining_length);
 
 
 	return ret_size;
+}
+
+char *cam_set_baud_115200()
+{
+	uint8_t args[] = {0x03, 0x01, 0x1C, 0x1C};
+
+	send_command(COMMAND_SET_PORT, args, sizeof(args));
+	  // get reply
+	  if (!rekt_read_response(CAMERA_BUFFER_SIZE, 10000000));
+	    return 0;
+	  camera_buffer[buffer_length] = 0;  // end it!
+	  return (char *)camera_buffer;  // return it!
 }
 
 

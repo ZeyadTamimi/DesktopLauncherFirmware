@@ -33,6 +33,8 @@ typedef enum resolution
  */
 void cam_init(void);
 
+char* cam_set_baud_115200();
+
 /*!
  * \brief Queries the camera for its current resolution.
  * \return This function returns the current set resolution for the camera as

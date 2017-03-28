@@ -22,9 +22,18 @@
 
 
 //===================================================================
+// Enums
+//===================================================================
+typedef enum baud
+{
+	BAUD_115200 = 0x01,
+	BAUD_57600 = 0x02
+} baud;
+//===================================================================
 // Public Function Declarations
 //===================================================================
 void init_serial(volatile unsigned char* device);
+void set_device_baud(volatile unsigned char* device, baud baud_rate);
 int test_for_received_data(volatile unsigned char* device);
 int wait_for_received_data(volatile unsigned char* device, unsigned long timeout_usec);
 

@@ -235,6 +235,35 @@ uint8_t move_command_time(uint8_t *bluetooth_rx_message, uint16_t size)
 	return RESPONSE_NO_ERROR;
 }
 
+uint8_t move_command_time_speed(uint8_t *bluetooth_rx_message, uint16_t size)
+{
+	// TODO Add size check
+	// Get the speed
+	uint8_t speed = bluetooth_rx_message[SIZE_FIELD_HEADER];
+	if (speed > MAX_MOTOR_SPEED || speed < MIN_MOTOR_SPEED)
+		return RESPONSE_INVALID_PARAM;
+	// Get the direction
+	uint8_t direction = bluetooth_rx_message[SIZE_FIELD_HEADER + SIZE_FIELD_COMMAND_MOVE_SPEED];
+	if (direction > MOVE_DOWN)
+		return RESPONSE_INVALID_PARAM;
+
+	uint32_t wait_time = 0;
+	// Retrieve the wait time
+	int byte_index;
+	for (byte_index = 0; byte_index < SIZE_FIELD_COMMAND_MOVE_TIME; byte_index++)
+		wait_time |= bluetooth_rx_message[SIZE_FIELD_HEADER + SIZE_FIELD_COMMAND_MOVE_SPEED + SIZE_FIELD_COMMAND_MOVE_DIR + byte_index] << (8 * (3 - byte_index));
+
+	// Swap the speed
+	int prev_speed  = get_motor_speed();
+	set_motor_speed(speed);
+	// Move the motor
+	move_direction(direction);
+	usleep(wait_time);
+	stop_leftrght();
+	set_motor_speed(prev_speed);
+	return RESPONSE_NO_ERROR;
+}
+
 uint8_t set_motor_speed_command(uint8_t *bluetooth_rx_message, uint16_t size)
 {
 	// TODO Add size check
@@ -242,6 +271,15 @@ uint8_t set_motor_speed_command(uint8_t *bluetooth_rx_message, uint16_t size)
 	if (new_speed)
 		return RESPONSE_INVALID_PARAM;
 	set_motor_speed(new_speed);
+	return RESPONSE_NO_ERROR;
+}
+
+uint8_t move_command_angle(uint8_t *bluetooth_rx_message, uint16_t size)
+{
+	// TODO Add size check
+	int8_t angle_x = bluetooth_rx_message[SIZE_FIELD_HEADER];
+	int8_t angle_y = bluetooth_rx_message[SIZE_FIELD_HEADER + SIZE_FIELD_COMMAND_MOVE_ANGLE_X];
+	// TODO CALL KONRAD's STUFF
 	return RESPONSE_NO_ERROR;
 }
 
@@ -272,12 +310,21 @@ void handle_command(uint8_t *bluetooth_rx_message, uint16_t size)
 		case ID_COMMAND_MOVE_TIME:
 			response_code = move_command_time(bluetooth_rx_message, size);
 			break;
+		case ID_COMMAND_MOVE_ANGLE:
+			response_code = move_command_angle(bluetooth_rx_message, size);
+			break;
 		case ID_COMMAND_CHANGE_SPEED:
 			response_code = set_motor_speed_command(bluetooth_rx_message, size);
 			break;
 		case ID_COMMAND_FIRE:
 			motor_fire();
 			response_code = RESPONSE_NO_ERROR;
+			break;
+		case ID_ANDROID_HANDSHAKE:
+			response_code = RESPONSE_NIOS_HANDSHAKE;
+			break;
+		case ID_COMMAND_MOVE_TIME_SPEED:
+			response_code = move_command_time_speed(bluetooth_rx_message, size);
 			break;
 		default :
 			response_code = RESPONSE_INVALID_COMMAND;
@@ -339,7 +386,7 @@ int main(void)
 	uint8_t *bluetooth_rx_message;
 	uint16_t message_size;
 
-
+	//bluetooth_main();
 
 	// Main loop
 	printf("IN MAIN!\n");
