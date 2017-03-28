@@ -1,3 +1,5 @@
+#include <stdint.h>
+
 #ifndef MOTOR_H_
 #define MOTOR_H_
 
@@ -17,6 +19,8 @@ void move_down(void);
 void move_left(void);
 void move_right(void);
 void stop_leftrght(void);
+void move_updown_angle(int16_t angle);
+void move_leftright_angle(int16_t angle);
 void motor_load(void);
 void motor_fire(void);
 // use around 1 - 9

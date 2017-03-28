@@ -2,6 +2,7 @@
 
 #include "motor.h"
 #include <unistd.h>
+#include <stdint.h>
 
 //===================================================================
 // Memory Mapped Defines
@@ -13,22 +14,25 @@
 //===================================================================
 // Motor Limits
 //===================================================================
-#define kCW180_MAX 5000
-#define kCW180_MIN 2800
+#define kCW180_MAX 4900
+#define kCW180_MIN 2900
 #define kCW180_MID 3900
+//2000-8000
 
 #define kCWFIRE_MAX 5750
 #define kCWFIRE_MIN 2000
 #define kCWFIRE_MID 3000
 
 #define kRANGE360 32
-#define kCW360_MID 4111
-#define kCW360_MAX (kCW360_MID + kRANGE360)
-#define kCW360_MIN (kCW360_MID - kRANGE360)
+//#define kCW360_MID 4155
+//#define kCW360_MAX (kCW360_MID + kRANGE360)
+//#define kCW360_MIN (kCW360_MID - kRANGE360)
 
 //===================================================================
 // Constants
 //===================================================================
+#define UP_DOWN_ANGLE_PWM 33
+#define LEFT_RIGHT_ANGLE_TIME 18000
 
 //===================================================================
 // Global variables
@@ -39,6 +43,8 @@ int bluetooth_enabled = 0;
 int bluetooth_multiplier = 15;
 int up_multiplier = 1;
 int down_multiplier = 1;
+
+uint16_t kCW360_MID = 4119;
 
 //===================================================================
 // Private Function Definitions
@@ -73,12 +79,29 @@ void init_motors(void)
     PWM_CW180 = kCW180_MID;
     PWM_CW360 = kCW360_MID;
     PWM_CWFIRE = kCWFIRE_MID;
+
+    //for setting up 360 center
+    if(1)
+    {
+    	printf("360 motor init\n");
+    	uint16_t d = 1;
+    	while(d != 0)
+    	{
+			move_leftright_angle(45);
+			usleep(500000);
+			move_leftright_angle(-45);
+			usleep(500000);
+			printf("enter delta: ");
+			scanf("%d", &d);
+			kCW360_MID -= d;
+			printf("new mid: %d\n", kCW360_MID);
+    	}
+    }
 }
 
 void move_direction(int direction)
 {
 	bluetooth_enabled = 1;
-	int x;
 	switch(direction)
 	{
 	case MOVE_UP:
@@ -103,15 +126,16 @@ void move_up(void)
 {
     if (PWM_CW180 > kCW180_MIN)
     {
+        uint16_t PWM_NEW = PWM_CW180;
         if(bluetooth_enabled)
         {
-            PWM_CW180 -= updown_speed * bluetooth_multiplier * up_multiplier;
+            PWM_NEW -= updown_speed * bluetooth_multiplier * up_multiplier;
             up_multiplier = 1;
             down_multiplier = 3;
         }
         else
-            PWM_CW180 -= updown_speed;
-        PWM_CW180 = PWM_CW180 > kCW180_MIN ? PWM_CW180 : kCW180_MIN;
+            PWM_NEW -= updown_speed;
+        PWM_CW180 = PWM_NEW > kCW180_MIN ? PWM_NEW : kCW180_MIN;
         assert(PWM_CW180 >= kCW180_MIN);
     }
 }
@@ -120,15 +144,16 @@ void move_down(void)
 {
     if (PWM_CW180 < kCW180_MAX)
     {
+        uint16_t PWM_NEW = PWM_CW180;
         if(bluetooth_enabled)
         {
-            PWM_CW180 += updown_speed * bluetooth_multiplier * down_multiplier;
+            PWM_NEW += updown_speed * bluetooth_multiplier * down_multiplier;
         	up_multiplier = 3;
         	down_multiplier = 1;
         }
         else
-            PWM_CW180 += updown_speed;
-        PWM_CW180 = PWM_CW180 < kCW180_MAX ? PWM_CW180 : kCW180_MAX;
+            PWM_NEW += updown_speed;
+        PWM_CW180 = PWM_NEW < kCW180_MAX ? PWM_NEW : kCW180_MAX;
         assert(PWM_CW180 <= kCW180_MAX);
     }
 }
@@ -141,6 +166,50 @@ void move_left(void)
 void move_right(void)
 {
 	PWM_CW360 = kCW360_MID - kRANGE360 * leftright_speed;
+}
+
+void move_updown_angle(int16_t angle)
+{
+	if (angle < -360)
+		angle = -360;
+	else if (angle > 360)
+		angle = 360;
+
+	int32_t PWM_NEW = PWM_CW180;
+	PWM_NEW = PWM_NEW - angle * UP_DOWN_ANGLE_PWM;
+	if(PWM_NEW > kCW180_MAX)
+	{
+		PWM_CW180 = kCW180_MAX;
+	}
+	else if(PWM_NEW < kCW180_MIN)
+	{
+		PWM_CW180 = kCW180_MIN;
+	}
+	else
+	{
+		PWM_CW180 = PWM_NEW;
+	}
+}
+
+void move_leftright_angle(int16_t angle)
+{
+	if (angle < -360)
+		angle = -360;
+	else if (angle > 360)
+		angle = 360;
+
+	if (angle > 0)
+	{
+		PWM_CW360 = kCW360_MID - kRANGE360 * 3;
+	}
+	else
+	{
+		PWM_CW360 = kCW360_MID + kRANGE360 * 3;
+		angle *= -1;
+	}
+
+	usleep(angle * LEFT_RIGHT_ANGLE_TIME);
+	stop_leftrght();
 }
 
 void stop_leftrght(void)
