@@ -24,9 +24,6 @@
 #define kCWFIRE_MID 3000
 
 #define kRANGE360 32
-//#define kCW360_MID 4155
-//#define kCW360_MAX (kCW360_MID + kRANGE360)
-//#define kCW360_MIN (kCW360_MID - kRANGE360)
 
 //===================================================================
 // Constants
@@ -44,7 +41,7 @@ int bluetooth_multiplier = 15;
 int up_multiplier = 1;
 int down_multiplier = 1;
 
-uint16_t kCW360_MID = 4119;
+uint16_t kCW360_MID = 4113;
 
 //===================================================================
 // Private Function Definitions
@@ -75,13 +72,13 @@ int motor_test()
 //===================================================================
 void init_motors(void)
 {
-    set_motor_speed(1);
+    set_motor_speed(2);
     PWM_CW180 = kCW180_MID;
     PWM_CW360 = kCW360_MID;
     PWM_CWFIRE = kCWFIRE_MID;
 
     //for setting up 360 center
-    if(1)
+    if(0)
     {
     	printf("360 motor init\n");
     	uint16_t d = 1;
@@ -96,6 +93,14 @@ void init_motors(void)
 			kCW360_MID -= d;
 			printf("new mid: %d\n", kCW360_MID);
     	}
+
+        uint16_t a = 1;
+        while(a != 0)
+        {
+        	printf("angle: ");
+        	scanf("%d", &a);
+        	move_updown_angle(a);
+        }
     }
 }
 

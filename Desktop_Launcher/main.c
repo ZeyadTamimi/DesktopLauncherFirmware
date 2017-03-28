@@ -25,9 +25,6 @@
 #define USER_POLL 50000
 #define BLUETOOTH_INITIAL_POLL 5000000
 
-// Motor Speeds
-#define DEFAULT_MOTOR_SPEED 2
-
 // Text Message
 const char * motion_mesasge = "Someone is moving around!";
 
@@ -364,7 +361,6 @@ int main(void)
 
 	// Init the motors
 	init_motors();
-	set_motor_speed(DEFAULT_MOTOR_SPEED);
 
     // Gui init code
 	init_gui();
