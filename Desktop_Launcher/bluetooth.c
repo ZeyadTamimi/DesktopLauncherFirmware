@@ -132,6 +132,16 @@ void bluetooth_send_image(uint8_t *image_data, uint16_t image_size)
 	serial_write(BLUETOOTH, image_data, image_size);
 }
 
+void bluetooth_send_motion(uint8_t detected)
+{
+	uint8_t out_buffer[4];
+	out_buffer[0] = ID_MESG_MOTION;
+	out_buffer[1] = 0;
+	out_buffer[2] = 1;
+	out_buffer[3] = detected;
+	serial_write(BLUETOOTH, out_buffer, 4);
+}
+
 int bluetooth_connected(void)
 {
 	int result;

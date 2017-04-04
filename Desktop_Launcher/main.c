@@ -153,7 +153,9 @@ void auto_mode(void)
 	disable_button(CAMERA_BUTTON);
 	disable_button(UP_BUTTON);
 
+//	TODO delete
 	uint8_t * jpeg_photo_buffer = NULL;
+//
 
 	// Move the motor
 	move_left();
@@ -280,6 +282,16 @@ uint8_t move_command_angle(uint8_t *bluetooth_rx_message, uint16_t size)
 	return RESPONSE_NO_ERROR;
 }
 
+uint8_t change_resolution(uint8_t *bluetooth_rx_message, uint16_t size)
+{
+	resolution res = (resolution) bluetooth_rx_message[SIZE_FIELD_HEADER];
+	int result = set_image_resolution(res);
+	if(result)
+		return RESPONSE_INVALID_PARAM;
+	else
+		return RESPONSE_NO_ERROR;
+}
+
 void send_image_capture()
 {
 	uint8_t * jpeg_photo_buffer = NULL;
@@ -294,6 +306,19 @@ void send_image_capture()
 	printf("Image size is %ld\n", photo_size);
 	bluetooth_send_image(jpeg_photo_buffer, photo_size);
 	free(jpeg_photo_buffer);
+}
+
+void send_motion_report()
+{
+	// Check Motion
+	set_motion_detect(1);
+
+	if (!get_motion_detect())
+		printf("MOTION SHOULD BE ON\n");
+
+	int detected = motion_detected(2000000);
+	set_motion_detect(0);
+	bluetooth_send_motion((uint8_t) detected);
 }
 
 
@@ -323,6 +348,9 @@ void handle_command(uint8_t *bluetooth_rx_message, uint16_t size)
 		case ID_COMMAND_MOVE_TIME_SPEED:
 			response_code = move_command_time_speed(bluetooth_rx_message, size);
 			break;
+		case ID_COMMAND_CHANGE_RES:
+			response_code = change_resolution(bluetooth_rx_message, size);
+			break;
 		default :
 			response_code = RESPONSE_INVALID_COMMAND;
 			break;
@@ -338,6 +366,9 @@ void handle_request(uint8_t *bluetooth_rx_message, uint16_t size)
 	{
 		case ID_MESG_IMAGE:
 			send_image_capture();
+			break;
+		case ID_MESG_MOTION:
+			send_motion_report();
 			break;
 		default :
 			bluetooth_send_response(bluetooth_rx_message[0], RESPONSE_INVALID_REQUEST);
