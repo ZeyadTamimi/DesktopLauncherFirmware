@@ -14,6 +14,7 @@
 #include "wifi.h"
 #include "time.h"
 #include "bluetooth.h"
+#include "serial.h"
 
 // Enable Image Processing
 #define _NJ_INCLUDE_HEADER_ONLY
@@ -386,9 +387,15 @@ int main(void)
 	njInit();
 	cam_init();
     camera_reset();
-    printf(" Image Resolution was %d\n", get_image_resolution());
+    
+	printf(" Image Resolution was %d\n", get_image_resolution());
     set_image_resolution(FRAME_320x240);
 	printf(" Image Resolution was %d\n", get_image_resolution());
+	cam_set_baud_115200();
+	set_device_baud(CAMERA, BAUD_115200);
+	set_image_resolution(FRAME_320x240);
+	printf(" Image Resolution was %d\n", get_image_resolution());
+
 
 	// Init the motors
 	init_motors();

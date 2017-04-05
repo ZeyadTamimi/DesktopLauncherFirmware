@@ -336,11 +336,11 @@ uint32_t read_full_picture(uint8_t ** jpeg_buffer)
 
 char *cam_set_baud_115200()
 {
-	uint8_t args[] = {0x03, 0x01, 0x1C, 0x1C};
+	uint8_t args[] = {0x03, 0x01, 0x0D, 0xA6};
 
 	send_command(COMMAND_SET_PORT, args, sizeof(args));
 	  // get reply
-	  if (!rekt_read_response(CAMERA_BUFFER_SIZE, 10000000));
+	  if (!rekt_read_response(CAMERA_BUFFER_SIZE, 1000000));
 	    return 0;
 	  camera_buffer[buffer_length] = 0;  // end it!
 	  return (char *)camera_buffer;  // return it!

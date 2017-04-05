@@ -37,7 +37,7 @@
 unsigned short updown_speed;
 unsigned short leftright_speed;
 int bluetooth_enabled = 0;
-int bluetooth_multiplier = 15;
+int bluetooth_multiplier = 14;
 int up_multiplier = 1;
 int down_multiplier = 1;
 
@@ -165,12 +165,18 @@ void move_down(void)
 
 void move_left(void)
 {
-	PWM_CW360 = kCW360_MID + kRANGE360 * leftright_speed;
+	if (bluetooth_enabled)
+		PWM_CW360 = kCW360_MID + kRANGE360 * (leftright_speed * 2);
+	else
+		PWM_CW360 = kCW360_MID + kRANGE360 * leftright_speed;
 }
 
 void move_right(void)
 {
-	PWM_CW360 = kCW360_MID - kRANGE360 * leftright_speed;
+	if (bluetooth_enabled)
+			PWM_CW360 = kCW360_MID - kRANGE360 * (2 * leftright_speed);
+		else
+			PWM_CW360 = kCW360_MID - kRANGE360 * leftright_speed;
 }
 
 void move_updown_angle(int16_t angle)
