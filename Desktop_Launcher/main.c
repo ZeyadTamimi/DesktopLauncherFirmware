@@ -38,6 +38,8 @@ typedef enum desktop_launcher_mode
 
 volatile desktop_launcher_mode current_mode;
 volatile int bluetooth_enabled;
+uint8_t *bluetooth_rx_message;
+uint16_t message_size;
 
 //===================================================================
 // Callbacks
@@ -46,7 +48,6 @@ void mode_manual_callback()
 {
 	current_mode = MANUAL;
 }
-
 
 void mode_security_callback()
 {
@@ -380,27 +381,14 @@ void handle_request(uint8_t *bluetooth_rx_message, uint16_t size)
 
 int main(void)
 {
-
-	// Mode Initialization
-	current_mode = MANUAL;
-	// Initialize the camera
+	// Init Camera
 	njInit();
 	cam_init();
-    camera_reset();
-    
-	printf(" Image Resolution was %d\n", get_image_resolution());
-    set_image_resolution(FRAME_320x240);
-	printf(" Image Resolution was %d\n", get_image_resolution());
-	cam_set_baud_115200();
-	set_device_baud(CAMERA, BAUD_115200);
-	set_image_resolution(FRAME_320x240);
-	printf(" Image Resolution was %d\n", get_image_resolution());
 
-
-	// Init the motors
+	// Init Motors
 	init_motors();
 
-    // Gui init code
+    // Init Gui and set up callbacks
 	init_gui();
 	change_button_callback(LEFT_BUTTON, move_left);
 	change_button_callback(RIGHT_BUTTON, move_right);
@@ -410,17 +398,17 @@ int main(void)
 	change_button_callback(SECURITY_BUTTON, mode_security_callback);
 	change_button_callback(AUTOMATIC_BUTTON, mode_auto_callback);
 	change_button_callback(BLUETOOTH_BUTTON, bluetooth_callback);
-
 	change_button_callback(FIRE_BUTTON, motor_fire);
 	change_button_callback(CAMERA_BUTTON, photo_callback);
 
 	// Init Bluetooth
-	bluetooth_enabled = 0;
 	init_bluetooth();
-	uint8_t *bluetooth_rx_message;
-	uint16_t message_size;
 
 	//bluetooth_main();
+
+	// Mode Initialization
+	current_mode = MANUAL;
+	bluetooth_enabled = 0;
 
 	// Main loop
 	printf("IN MAIN!\n");

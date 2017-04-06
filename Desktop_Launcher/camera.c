@@ -6,10 +6,9 @@
 #include <string.h>
 #include <assert.h>
 #include <stdlib.h>
-// project Includes
+// Project Includes
 #include "serial.h"
 #include "camera.h"
-//#include "debug.h"
 
 //===================================================================
 // Defines
@@ -43,13 +42,10 @@
 // This was achieved by trial and error.
 #define STD_WAIT ((unsigned long) 70000)
 
-
-
 //===================================================================
 // Constants
 //===================================================================
 const uint8_t COMMAND_HEADER[] = {SYNC_BYTE, SERIAL_ID};
-
 
 //===================================================================
 // Global variables
@@ -57,7 +53,6 @@ const uint8_t COMMAND_HEADER[] = {SYNC_BYTE, SERIAL_ID};
 uint8_t camera_buffer[CAMERA_BUFFER_SIZE+1];
 uint8_t buffer_length;
 uint16_t frame_ptr;
-
 
 //===================================================================
 // Private Function Definitions
@@ -159,6 +154,45 @@ int camera_frame_buff_ctrl(uint8_t command)
 	return run_command(COMMAND_FBUF_CTRL, args, 2, 5, 1);
 }
 
+uint32_t frame_length(void)
+{
+	uint8_t args[] = {0x01, 0x00};
+	int command_response = run_command(COMMAND_GET_FBUF_LEN, args, 2, 9, 1);
+
+	if(!command_response)
+		return 0;
+
+	uint32_t len;
+	len = camera_buffer[5];
+	len <<= 8;
+	len |= camera_buffer[6];
+	len <<= 8;
+	len |= camera_buffer[7];
+	len <<= 8;
+	len |= camera_buffer[8];
+
+	return len;
+}
+
+int set_motion_status(uint8_t x, uint8_t d1, uint8_t d2) {
+  uint8_t args[] = {0x03, x, d1, d2};
+
+  return run_command(MOTION_CTRL, args, sizeof(args), 5, 1);
+}
+
+char *cam_set_baud_115200()
+{
+	uint8_t args[] = {0x03, 0x01, 0x0D, 0xA6};
+
+	send_command(COMMAND_SET_PORT, args, sizeof(args));
+	  // get reply
+	  if (!rekt_read_response(CAMERA_BUFFER_SIZE, 1000000))
+	    return 0;
+
+	  camera_buffer[buffer_length] = 0;  // end it!
+	  return (char *)camera_buffer;  // return it!
+}
+
 //===================================================================
 // Public Function Definitions
 //===================================================================
@@ -170,6 +204,17 @@ void cam_init(void)
     init_serial(CAMERA);
     serial_read_timeout(CAMERA, camera_buffer, CAMERA_BUFFER_SIZE +1, STD_WAIT);
     memset(camera_buffer, 0, CAMERA_BUFFER_SIZE +1);
+    camera_reset();
+
+	printf(" Image Resolution was %d\n", get_image_resolution());
+    set_image_resolution(FRAME_320x240);
+	printf(" Image Resolution was %d\n", get_image_resolution());
+
+	cam_set_baud_115200();
+	set_device_baud(CAMERA, BAUD_115200);
+
+    set_image_resolution(FRAME_320x240);
+	printf(" Image Resolution was %d\n", get_image_resolution());
 }
 
 resolution get_image_resolution()
@@ -204,37 +249,11 @@ int resume_picture(void)
     return camera_frame_buff_ctrl(COMMAND_RESUMEFRAME);
 }
 
-uint32_t frame_length(void)
-{
-	uint8_t args[] = {0x01, 0x00};
-	int command_response = run_command(COMMAND_GET_FBUF_LEN, args, 2, 9, 1);
-
-	if(!command_response)
-		return 0;
-
-	uint32_t len;
-	len = camera_buffer[5];
-	len <<= 8;
-	len |= camera_buffer[6];
-	len <<= 8;
-	len |= camera_buffer[7];
-	len <<= 8;
-	len |= camera_buffer[8];
-
-	return len;
-}
-
 int camera_reset(void)
 {
   uint8_t args[] = {0x0};
 
   return run_command(COMMAND_RESET, args, 1, 5, 1);
-}
-
-int set_motion_status(uint8_t x, uint8_t d1, uint8_t d2) {
-  uint8_t args[] = {0x03, x, d1, d2};
-
-  return run_command(MOTION_CTRL, args, sizeof(args), 5, 1);
 }
 
 int set_motion_detect(int flag)
@@ -248,7 +267,6 @@ int set_motion_detect(int flag)
   return run_command(COMMAND_MOTION_CTRL, args, sizeof(args), 5, 1);
 }
 
-
 int get_motion_detect(void)
 {
   uint8_t args[] = {0x0};
@@ -258,7 +276,6 @@ int get_motion_detect(void)
 
   return camera_buffer[5];
 }
-
 
 int motion_detected(unsigned long timeout)
 {
@@ -333,19 +350,3 @@ uint32_t read_full_picture(uint8_t ** jpeg_buffer)
 
 	return ret_size;
 }
-
-char *cam_set_baud_115200()
-{
-	uint8_t args[] = {0x03, 0x01, 0x0D, 0xA6};
-
-	send_command(COMMAND_SET_PORT, args, sizeof(args));
-	  // get reply
-	  if (!rekt_read_response(CAMERA_BUFFER_SIZE, 1000000));
-	    return 0;
-	  camera_buffer[buffer_length] = 0;  // end it!
-	  return (char *)camera_buffer;  // return it!
-}
-
-
-
-

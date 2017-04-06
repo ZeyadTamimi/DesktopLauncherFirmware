@@ -289,7 +289,6 @@ void init_gui(){
 	up_button.callback = NULL;
 	up_button.disabled = 0;
 
-
 	Button down_button;
 	down_button.x0 = 350;
 	down_button.x1 = 450;
@@ -319,10 +318,7 @@ void init_gui(){
 	button_array[MANUAL_BUTTON] = manual_button;
 	button_array[AUTOMATIC_BUTTON] = automatic_button;
 	button_array[SECURITY_BUTTON] = security_button;
-
-	//ADDED-----------------------------------
 	button_array[BLUETOOTH_BUTTON] = bluetooth_button;
-	//----------------------------------------
 
 	button_array[FIRE_BUTTON] = fire_button;
 	button_array[LEFT_BUTTON] = left_button;

@@ -6,9 +6,6 @@
 //===================================================================
 #include <stdint.h>
 
-
-#define CAMERA_FRAME_PADDING 5
-
 //===================================================================
 // Public Types
 //===================================================================
@@ -32,8 +29,7 @@ typedef enum resolution
  *        clears the internal receive buffers.
  */
 void cam_init(void);
-
-char* cam_set_baud_115200();
+int camera_reset(void);
 
 /*!
  * \brief Queries the camera for its current resolution.
@@ -52,10 +48,6 @@ resolution get_image_resolution();
 int set_image_resolution(resolution new_resolution);
 
 int take_picture(void);
-
-uint32_t frame_length(void);
-
-int camera_reset(void);
 
 uint8_t *read_picture(uint8_t n);
 int resume_picture(void);

@@ -1,9 +1,14 @@
 #ifndef BLUETOOTH_H_
 #define BLUETOOTH_H_
 
+//===================================================================
+// Includes
+//===================================================================
 #include<stdint.h>
 
+//===================================================================
 // Message IDs
+//===================================================================
 // Commands
 #define ID_COMMAND_MOVE_TIME 0x01
 #define ID_COMMAND_MOVE_ANGLE 0x02
@@ -34,7 +39,9 @@
 #define RESPONSE_INVALID_REQUEST 3
 #define RESPONSE_NIOS_HANDSHAKE 4
 
-void bluetooth_main(void);
+//===================================================================
+// Public Function Declaration
+//===================================================================
 void init_bluetooth(void);
 int bluetooth_receive_message_timeout(uint8_t **message_buffer, unsigned long timeout);
 void bluetooth_send_response(uint8_t response_message_id, uint8_t response_code);
@@ -42,6 +49,5 @@ void bluetooth_send_image(uint8_t *image_data, uint16_t image_size);
 void bluetooth_send_motion(uint8_t detected);
 int bluetooth_connected(void);
 void flush_buffer(void);
-
 
 #endif /* BLUETOOTH_H_ */

@@ -1,13 +1,15 @@
 //===================================================================
 // Includes
 //===================================================================
+// System Includes
 #include <stdint.h>
 #include <unistd.h>
 #include <string.h>
-
+// Project Includes
 #include "bluetooth.h"
 #include "serial.h"
 #include "debug.h"
+
 //===================================================================
 // Defines
 //===================================================================
@@ -72,17 +74,9 @@ int check_connection(void)
 		return 0;
 }
 
-
 //===================================================================
 // Public Function Definitions
 //===================================================================
-void bluetooth_main(void)
-{
-	enter_cmd_mode();
-	printf("cmd mode");
-	while(1);
-}
-
 void init_bluetooth(void)
 {
 	flush_buffer();
