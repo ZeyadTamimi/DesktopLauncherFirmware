@@ -1,9 +1,3 @@
-/*
- * serial.h
- *
- *  Created on: Jan 26, 2017
- *      Author: Zeyad
- */
 #ifndef SERIAL_H_
 #define SERIAL_H_
 
@@ -20,7 +14,6 @@
 #define CAMERA (volatile unsigned char *)(0x84000210)
 #define TOUCHSCREEN (volatile unsigned char *)(0x84000230)
 
-
 //===================================================================
 // Enums
 //===================================================================
@@ -29,6 +22,7 @@ typedef enum baud
 	BAUD_115200 = 0x01,
 	BAUD_57600 = 0x02
 } baud;
+
 //===================================================================
 // Public Function Declarations
 //===================================================================

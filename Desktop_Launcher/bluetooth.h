@@ -7,9 +7,9 @@
 #include<stdint.h>
 
 //===================================================================
-// Message IDs
+// Defines
 //===================================================================
-// Commands
+// Message IDs - Commands
 #define ID_COMMAND_MOVE_TIME 0x01
 #define ID_COMMAND_MOVE_ANGLE 0x02
 #define ID_COMMAND_CHANGE_SPEED 0x03
@@ -22,7 +22,7 @@
 #define ID_MESG_MOTION 0xF3
 #define ID_ANDROID_HANDSHAKE 0xFF
 
-// Field Sizes
+// Message IDs - Field Sizes
 #define SIZE_FIELD_ID 1
 #define SIZE_FIELD_LENGTH 2
 #define SIZE_FIELD_HEADER (SIZE_FIELD_ID + SIZE_FIELD_LENGTH)

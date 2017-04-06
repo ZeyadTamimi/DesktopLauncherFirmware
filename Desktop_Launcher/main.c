@@ -155,10 +155,6 @@ void auto_mode(void)
 	disable_button(CAMERA_BUTTON);
 	disable_button(UP_BUTTON);
 
-//	TODO delete
-	uint8_t * jpeg_photo_buffer = NULL;
-//
-
 	// Move the motor
 	move_left();
 	usleep(1000000);
@@ -194,7 +190,6 @@ void manual_mode(void)
 	enable_button(FIRE_BUTTON);
 	enable_button(CAMERA_BUTTON);
 }
-
 
 //===================================================================
 // Utility Functions
@@ -404,14 +399,12 @@ int main(void)
 	// Init Bluetooth
 	init_bluetooth();
 
-	//bluetooth_main();
-
 	// Mode Initialization
 	current_mode = MANUAL;
 	bluetooth_enabled = 0;
 
 	// Main loop
-	printf("IN MAIN!\n");
+	printf("In Main\n");
     while (1)
     {
 		if (bluetooth_enabled)

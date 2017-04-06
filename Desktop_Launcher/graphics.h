@@ -1,16 +1,16 @@
 #ifndef GRAPHICS_H_
 #define GRAPHICS_H_
 
+//===================================================================
+// Includes
+//===================================================================
 #include<stdint.h>
 
 
-
-// defined constants representing colours pre-programmed into colour palette
-// there are 256 colours but only 8 are shown below, we write these to the colour registers
-//
-// the header files "Colours.h" contains constants for all 256 colours
-// while the course file ColourPaletteData.c contains the 24 bit RGB data
-// that is pre-programmed into the palette
+//===================================================================
+// Defines
+//===================================================================
+// These numbers represent entries in the LCD color palette
 #define	BLACK			0
 #define	WHITE			63
 #define	RED			    48
@@ -29,9 +29,7 @@ typedef enum button_type
 	manual,
 	automatic,
 	security,
-	//ADDED--------------
 	bluetooth,
-	//-------------------
 	fire,
 	camera,
 	left,
@@ -41,9 +39,7 @@ typedef enum button_type
 	manual_pressed,
 	automatic_pressed,
 	security_pressed,
-	//ADDED--------------
 	bluetooth_pressed,
-	//-------------------
 	fire_pressed,
 	camera_pressed,
 	left_pressed,
@@ -52,8 +48,9 @@ typedef enum button_type
 	up_pressed
 } button_type;
 
-
-
+//===================================================================
+// Public Function Declaration
+//===================================================================
 void init_palette();
 void print_image(unsigned char arr[320][240], int x_size, int y_size);
 void draw_button(button_type button, int colour);
@@ -68,4 +65,5 @@ void print_display( int arrow_colour,
 					int reticle_colour, 
 					int fire_colour, 
 					int camera_colour);
+
 #endif /* GRAPHICS_H_ */

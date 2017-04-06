@@ -1,9 +1,17 @@
+//===================================================================
+// Includes
+//===================================================================
+// System Includes
 #include <stdio.h>
 #include <stdint.h>
+// Project Includes
 #include "fonts.h"
 #include "graphics.h"
 
-// graphics registers all address begin with '8' so as to by pass data cache on NIOS
+//===================================================================
+// Defines
+//===================================================================
+// graphics registers all address begin with '8' to bypass NIOS cache
 #define GraphicsCommandReg   		(*(volatile unsigned short int *)(0x84000000))
 #define GraphicsStatusReg   		(*(volatile unsigned short int *)(0x84000000))
 #define GraphicsX1Reg   			(*(volatile unsigned short int *)(0x84000002))
@@ -18,9 +26,7 @@
 ***********************************************************************************************/
 #define WAIT_FOR_GRAPHICS		while((GraphicsStatusReg & 0x0001) != 0x0001);
 
-// #defined constants representing values we write to the graphics 'command' register to get
-// it to draw something
-
+// values we write to the graphics 'command' register to make it draw something
 #define DrawHLine		1
 #define DrawVLine		2
 #define DrawLine		3
@@ -28,15 +34,10 @@
 #define	GetAPixel		0xB
 #define	ProgramPaletteColour    0x10
 
-
-
-
 #define XRES				800
 #define YRES				480
 #define FONT2_XPIXELS		10				// width of Font2 characters in pixels (no spacing)
 #define FONT2_YPIXELS		14				// height of Font2 characters in pixels (no spacing)
-
-
 
 #define PICTURE_X_OFFSET 240
 #define PICTURE_Y_OFFSET 120
@@ -51,6 +52,18 @@
 #define DARROW_X1			350
 #define DARROW_Y1			430
 #define ARROW_LENGTH		100
+
+// data structure to store a coordinate
+typedef struct { int x,y;} XYPixel ;
+
+// an array of coordinates and a pointer to first
+XYPixel XYStack[1000], *Next = &XYStack[0];
+
+//===================================================================
+// Private Function Definitions
+//===================================================================
+void fill(int _x, int _y, int _FillColour, int _BoundaryColour);
+
 /*
  * This function writes a single pixel to the x,y coords specified using the specified colour
  * Note colour is a byte and represents a palette number (0-255) not a 24 bit RGB value
@@ -79,20 +92,6 @@ int read_a_pixel(int x, int y)
 
 	WAIT_FOR_GRAPHICS;			// is graphics done reading pixel
 	return (int)(GraphicsColourReg) ;	// return the palette number (colour)
-}
-
-/*
- * subroutine to program a hardware (graphics chip) palette number with an RGB value
- * e.g. program_palette(RED, 0x00FF0000) ;
- *
- */
-void program_palette(int PaletteNumber, uint32_t RGB)
-{
-    WAIT_FOR_GRAPHICS;
-    GraphicsColourReg = PaletteNumber;
-    GraphicsX1Reg = RGB >> 16   ;        // program red value in ls.8 bit of X1 reg
-    GraphicsY1Reg = RGB ;                // program green and blue into ls 16 bit of Y1 reg
-    GraphicsCommandReg = ProgramPaletteColour; // issue command
 }
 
 /*
@@ -165,8 +164,6 @@ void right_triangle(int x1, int y1, int height, int colour)
 	}
 }
 
-
-
 /*
  * Draw a left pointing triangle with top edge at x1,y1 with height and colour
  */
@@ -213,7 +210,6 @@ void up_triangle(int x1, int y1, int height, int colour)
  * Draw circle centered at x0,y0 with radius
  */
 void circle(int x0, int y0, int radius, int colour)
-
 {
     int x = radius;
     int y = 0;
@@ -244,284 +240,10 @@ void circle(int x0, int y0, int radius, int colour)
     fill(x0,y0,colour,colour);
 }
 
-/*
- * Clear the screen
- */
-void clear_screen(void)
-{
-	int i;
-	for(i=0;i<480;i++){
-		line(0,i,799,i,BLACK);
-	}
-}
-
-/*
- * Draw reticle to center of the screen
- */
-void reticle(int colour)
-{
-	rectangle(398,150,402,330,colour);
-	rectangle(310,238,490,242,colour);
-	rectangle(340,272,460,274,colour);
-	rectangle(370,304,430,306,colour);
-}
-
-void write_processing_message(int colour)
-{
-		OutGraphicsCharFont2a(346,85,colour,BLACK,'P',0);
-		OutGraphicsCharFont2a(358,85,colour,BLACK,'R',0);
-		OutGraphicsCharFont2a(370,85,colour,BLACK,'O',0);
-		OutGraphicsCharFont2a(382,85,colour,BLACK,'C',0);
-		OutGraphicsCharFont2a(394,85,colour,BLACK,'E',0);
-		OutGraphicsCharFont2a(406,85,colour,BLACK,'S',0);
-		OutGraphicsCharFont2a(418,85,colour,BLACK,'S',0);
-		OutGraphicsCharFont2a(430,85,colour,BLACK,'I',0);
-		OutGraphicsCharFont2a(442,85,colour,BLACK,'N',0);
-		OutGraphicsCharFont2a(454,85,colour,BLACK,'G',0);
-
-
-}
-
-void erase_processing_message(void)
-{
-	rectangle(345,60,470,110,BLACK);
-}
-
-/*
- * Draw set arrow layout with colour
- */
-void print_display(int arrow_colour, int menu_colour, int screen_colour,
-				  int reticle_colour, int fire_colour, int camera_colour)
-{
-	clear_screen();
-	//rectangle(60,60,740,420,screen_colour);
-	//reticle(reticle_colour);
-
-	//MENU ICONS
-	draw_button(fire,fire_colour);
-	draw_button(camera,camera_colour);
-	draw_button(security,menu_colour);
-
-	//ADDED----------------------------
-	draw_button(bluetooth,menu_colour);
-	//---------------------------------
-
-	draw_button(manual,menu_colour);
-	draw_button(automatic,menu_colour);
-	draw_button(left,arrow_colour);
-	draw_button(right,arrow_colour);
-	draw_button(up,arrow_colour);
-	draw_button(down,arrow_colour);
-}
-
-void draw_button(button_type button, int colour){
-	switch(button){
-
-	case(fire):
-		circle(600,440,30,colour);
-		OutGraphicsCharFont1(585,437,BLACK,colour,'F',0);
-		OutGraphicsCharFont1(595,437,BLACK,colour,'I',0);
-		OutGraphicsCharFont1(605,437,BLACK,colour,'R',0);
-		OutGraphicsCharFont1(615,437,BLACK,colour,'E',0);
-		break;
-
-	case(camera):
-		if(colour == GREY) {
-			circle(200,440,30,GREY);
-			rectangle(180,425,220,455,BLACK);
-			circle(200,440,10,WHITE);
-			circle(200,440,8,BLACK);
-			rectangle(185,420,195,425,WHITE);
-			circle(215,430,2,WHITE);
-		} else {
-			circle(200,440,30,colour);
-			rectangle(180,425,220,455,GREY);
-			circle(200,440,10,BLACK);
-			circle(200,440,8,WHITE);
-			rectangle(185,420,195,425,BLACK);
-			circle(215,430,2,RED);
-		}
-		break;
-	case(manual): 
-		rectangle(500,10,580,50,colour); 				 
-		OutGraphicsCharFont1(520,27,BLACK,colour,'M',0); 
-		OutGraphicsCharFont1(528,27,BLACK,colour,'A',0); 
-		OutGraphicsCharFont1(536,27,BLACK,colour,'N',0); 
-		OutGraphicsCharFont1(544,27,BLACK,colour,'U',0); 
-		OutGraphicsCharFont1(552,27,BLACK,colour,'A',0); 
-		OutGraphicsCharFont1(560,27,BLACK,colour,'L',0);
-		break;
-
-	case(automatic):
-		rectangle(590,10,670,50,colour);                 
-		OutGraphicsCharFont1(618,27,BLACK,colour,'A',0); 
-		OutGraphicsCharFont1(624,27,BLACK,colour,'U',0); 
-		OutGraphicsCharFont1(632,27,BLACK,colour,'T',0); 
-		OutGraphicsCharFont1(640,27,BLACK,colour,'O',0); 
-		break;
-
-	case(security):
-		rectangle(680,10,760,50,colour);                
-		OutGraphicsCharFont1(692,27,BLACK,colour,'S',0);
-		OutGraphicsCharFont1(700,27,BLACK,colour,'E',0);
-		OutGraphicsCharFont1(708,27,BLACK,colour,'C',0);
-		OutGraphicsCharFont1(716,27,BLACK,colour,'U',0);
-		OutGraphicsCharFont1(724,27,BLACK,colour,'R',0);
-		OutGraphicsCharFont1(732,27,BLACK,colour,'I',0);
-		OutGraphicsCharFont1(740,27,BLACK,colour,'T',0);
-		OutGraphicsCharFont1(748,27,BLACK,colour,'Y',0);
-		break;
-
-	//ADDED-----------------------------------------------
-	case(bluetooth):
-	
-		circle(50,50,30,colour);
-		
-		line(49,25,49,75,BLACK);
-		line(50,25,50,75,BLACK);
-		line(51,25,51,75,BLACK);
-
-		line(35,34,65,64,BLACK);
-		line(35,35,65,65,BLACK);
-		line(35,36,65,66,BLACK);
-
-		line(35,64,65,34,BLACK);
-		line(35,65,65,35,BLACK);
-		line(35,66,65,36,BLACK);
-
-		line(65,64,50,74,BLACK);
-		line(65,65,50,75,BLACK);
-		line(65,66,50,76,BLACK);
-
-		line(65,34,50,24,BLACK);
-		line(65,35,50,25,BLACK);
-		line(65,36,50,26,BLACK);
-
-	//----------------------------------------------------
-
-	case(left):
-		left_triangle(LARROW_X1,LARROW_Y1,ARROW_LENGTH,colour);
-		break;
-
-	case(right):
-		right_triangle(RARROW_X1,RARROW_Y1,ARROW_LENGTH,colour);
-		break;
-
-	case(down):
-		down_triangle(DARROW_X1,DARROW_Y1,ARROW_LENGTH,colour);
-		break;
-
-	case(up):
-		up_triangle(UARROW_X1,UARROW_Y1,ARROW_LENGTH,colour);
-		break;
-
-	case(fire_pressed):
-			circle(600,440,25,colour);
-			OutGraphicsCharFont1(585,437,BLACK,colour,'F',0);
-			OutGraphicsCharFont1(595,437,BLACK,colour,'I',0);
-			OutGraphicsCharFont1(605,437,BLACK,colour,'R',0);
-			OutGraphicsCharFont1(615,437,BLACK,colour,'E',0);
-			break;
-
-	case(camera_pressed):
-		circle(200,440,30,YELLOW);
-		circle(200,440,25,colour);
-		rectangle(180,425,220,455,GREY);
-		circle(200,440,10,BLACK);
-		circle(200,440,8,WHITE);
-		rectangle(185,420,195,425,BLACK);
-		circle(215,430,2,RED);
-		break;
-
-	case(manual_pressed):
-			rectangle(503,13,577,47,colour);
-			OutGraphicsCharFont1(520,27,BLACK,colour,'M',0);
-			OutGraphicsCharFont1(528,27,BLACK,colour,'A',0);
-			OutGraphicsCharFont1(536,27,BLACK,colour,'N',0);
-			OutGraphicsCharFont1(544,27,BLACK,colour,'U',0);
-			OutGraphicsCharFont1(552,27,BLACK,colour,'A',0);
-			OutGraphicsCharFont1(560,27,BLACK,colour,'L',0);
-			break;
-
-	case(automatic_pressed):
-			rectangle(593,13,667,47,colour);
-			OutGraphicsCharFont1(618,27,BLACK,colour,'A',0);
-			OutGraphicsCharFont1(624,27,BLACK,colour,'U',0);
-			OutGraphicsCharFont1(632,27,BLACK,colour,'T',0);
-			OutGraphicsCharFont1(640,27,BLACK,colour,'O',0);
-			break;
-
-	case(security_pressed):
-			rectangle(683,13,757,47,colour);
-			OutGraphicsCharFont1(692,27,BLACK,colour,'S',0);
-			OutGraphicsCharFont1(700,27,BLACK,colour,'E',0);
-			OutGraphicsCharFont1(708,27,BLACK,colour,'C',0);
-			OutGraphicsCharFont1(716,27,BLACK,colour,'U',0);
-			OutGraphicsCharFont1(724,27,BLACK,colour,'R',0);
-			OutGraphicsCharFont1(732,27,BLACK,colour,'I',0);
-			OutGraphicsCharFont1(740,27,BLACK,colour,'T',0);
-			OutGraphicsCharFont1(748,27,BLACK,colour,'Y',0);
-			break;
-
-	//ADDED-----------------------------------------------
-	case(bluetooth_pressed):
-	
-		circle(50,50,27,colour);
-		
-		line(49,25,49,75,BLACK);
-		line(50,25,50,75,BLACK);
-		line(51,25,51,75,BLACK);
-
-		line(35,34,65,64,BLACK);
-		line(35,35,65,65,BLACK);
-		line(35,36,65,66,BLACK);
-
-		line(35,64,65,34,BLACK);
-		line(35,65,65,35,BLACK);
-		line(35,66,65,36,BLACK);
-
-		line(65,64,50,74,BLACK);
-		line(65,65,50,75,BLACK);
-		line(65,66,50,76,BLACK);
-
-		line(65,34,50,24,BLACK);
-		line(65,35,50,25,BLACK);
-		line(65,36,50,26,BLACK);
-
-	//----------------------------------------------------
-	case(up_pressed):
-		up_triangle(UARROW_X1 + 12,UARROW_Y1-6,ARROW_LENGTH - 24,colour);
-		break;
-
-	case(down_pressed):
-		down_triangle(DARROW_X1 + 12,DARROW_Y1+6,ARROW_LENGTH - 24,colour);
-		break;
-
-	case(left_pressed):
-		left_triangle(LARROW_X1 - 6,LARROW_Y1+12,ARROW_LENGTH - 24,colour);
-		break;
-
-	case(right_pressed):
-		right_triangle(RARROW_X1 + 6,RARROW_Y1+12,ARROW_LENGTH - 24,colour);
-		break;
-	}
-}
-
-
-// data structure to store a coordinate
-
-typedef struct { int x,y;} XYPixel ;
-
-// an array of coordinates and a pointer to first
-
-XYPixel XYStack[1000], *Next = &XYStack[0];
-
-
 /*****************************************************************************************************************************
 * simple stack based around an array
 * Used for FILL algorithm
 ******************************************************************************************************************************/
-
 int push_pixel(XYPixel p1)
 {
     if(Next <= &XYStack[1000]) {
@@ -683,6 +405,7 @@ void fill(int _x, int _y, int _FillColour, int _BoundaryColour)
        	y = SaveY ;
     }
 }
+
 /*************************************************************************************************
 ** This function draws a single ASCII character at the coord and colour specified
 ** it optionally ERASES the background colour pixels to the background colour
@@ -726,7 +449,6 @@ void OutGraphicsCharFont1(int x, int y, int fontcolour, int backgroundcolour, in
 		}
 	}
 }
-
 
 /******************************************************************************************************************************
 ** This function draws a single ASCII character at the coord specified using the colour specified
@@ -774,6 +496,9 @@ void OutGraphicsCharFont2a(int x, int y, int colour, int backgroundcolour, int c
 	}
 }
 
+//===================================================================
+// Public Function Definitions
+//===================================================================
 void init_palette()
 {
 	int i,j,k;
@@ -802,4 +527,270 @@ void print_image(unsigned char arr[320][240], int x_size, int y_size)
     }
 }
 
+void draw_button(button_type button, int colour)
+{
+	switch(button){
 
+	case(fire):
+		circle(600,440,30,colour);
+		OutGraphicsCharFont1(585,437,BLACK,colour,'F',0);
+		OutGraphicsCharFont1(595,437,BLACK,colour,'I',0);
+		OutGraphicsCharFont1(605,437,BLACK,colour,'R',0);
+		OutGraphicsCharFont1(615,437,BLACK,colour,'E',0);
+		break;
+
+	case(camera):
+		if(colour == GREY) {
+			circle(200,440,30,GREY);
+			rectangle(180,425,220,455,BLACK);
+			circle(200,440,10,WHITE);
+			circle(200,440,8,BLACK);
+			rectangle(185,420,195,425,WHITE);
+			circle(215,430,2,WHITE);
+		} else {
+			circle(200,440,30,colour);
+			rectangle(180,425,220,455,GREY);
+			circle(200,440,10,BLACK);
+			circle(200,440,8,WHITE);
+			rectangle(185,420,195,425,BLACK);
+			circle(215,430,2,RED);
+		}
+		break;
+
+	case(manual):
+		rectangle(500,10,580,50,colour);
+		OutGraphicsCharFont1(520,27,BLACK,colour,'M',0);
+		OutGraphicsCharFont1(528,27,BLACK,colour,'A',0);
+		OutGraphicsCharFont1(536,27,BLACK,colour,'N',0);
+		OutGraphicsCharFont1(544,27,BLACK,colour,'U',0);
+		OutGraphicsCharFont1(552,27,BLACK,colour,'A',0);
+		OutGraphicsCharFont1(560,27,BLACK,colour,'L',0);
+		break;
+
+	case(automatic):
+		rectangle(590,10,670,50,colour);
+		OutGraphicsCharFont1(618,27,BLACK,colour,'A',0);
+		OutGraphicsCharFont1(624,27,BLACK,colour,'U',0);
+		OutGraphicsCharFont1(632,27,BLACK,colour,'T',0);
+		OutGraphicsCharFont1(640,27,BLACK,colour,'O',0);
+		break;
+
+	case(security):
+		rectangle(680,10,760,50,colour);
+		OutGraphicsCharFont1(692,27,BLACK,colour,'S',0);
+		OutGraphicsCharFont1(700,27,BLACK,colour,'E',0);
+		OutGraphicsCharFont1(708,27,BLACK,colour,'C',0);
+		OutGraphicsCharFont1(716,27,BLACK,colour,'U',0);
+		OutGraphicsCharFont1(724,27,BLACK,colour,'R',0);
+		OutGraphicsCharFont1(732,27,BLACK,colour,'I',0);
+		OutGraphicsCharFont1(740,27,BLACK,colour,'T',0);
+		OutGraphicsCharFont1(748,27,BLACK,colour,'Y',0);
+		break;
+
+	case(bluetooth):
+		circle(50,50,30,colour);
+
+		line(49,25,49,75,BLACK);
+		line(50,25,50,75,BLACK);
+		line(51,25,51,75,BLACK);
+
+		line(35,34,65,64,BLACK);
+		line(35,35,65,65,BLACK);
+		line(35,36,65,66,BLACK);
+
+		line(35,64,65,34,BLACK);
+		line(35,65,65,35,BLACK);
+		line(35,66,65,36,BLACK);
+
+		line(65,64,50,74,BLACK);
+		line(65,65,50,75,BLACK);
+		line(65,66,50,76,BLACK);
+
+		line(65,34,50,24,BLACK);
+		line(65,35,50,25,BLACK);
+		line(65,36,50,26,BLACK);
+		break;
+
+	case(left):
+		left_triangle(LARROW_X1,LARROW_Y1,ARROW_LENGTH,colour);
+		break;
+
+	case(right):
+		right_triangle(RARROW_X1,RARROW_Y1,ARROW_LENGTH,colour);
+		break;
+
+	case(down):
+		down_triangle(DARROW_X1,DARROW_Y1,ARROW_LENGTH,colour);
+		break;
+
+	case(up):
+		up_triangle(UARROW_X1,UARROW_Y1,ARROW_LENGTH,colour);
+		break;
+
+	case(fire_pressed):
+		circle(600,440,25,colour);
+		OutGraphicsCharFont1(585,437,BLACK,colour,'F',0);
+		OutGraphicsCharFont1(595,437,BLACK,colour,'I',0);
+		OutGraphicsCharFont1(605,437,BLACK,colour,'R',0);
+		OutGraphicsCharFont1(615,437,BLACK,colour,'E',0);
+		break;
+
+	case(camera_pressed):
+		circle(200,440,30,YELLOW);
+		circle(200,440,25,colour);
+		rectangle(180,425,220,455,GREY);
+		circle(200,440,10,BLACK);
+		circle(200,440,8,WHITE);
+		rectangle(185,420,195,425,BLACK);
+		circle(215,430,2,RED);
+		break;
+
+	case(manual_pressed):
+		rectangle(503,13,577,47,colour);
+		OutGraphicsCharFont1(520,27,BLACK,colour,'M',0);
+		OutGraphicsCharFont1(528,27,BLACK,colour,'A',0);
+		OutGraphicsCharFont1(536,27,BLACK,colour,'N',0);
+		OutGraphicsCharFont1(544,27,BLACK,colour,'U',0);
+		OutGraphicsCharFont1(552,27,BLACK,colour,'A',0);
+		OutGraphicsCharFont1(560,27,BLACK,colour,'L',0);
+		break;
+
+	case(automatic_pressed):
+		rectangle(593,13,667,47,colour);
+		OutGraphicsCharFont1(618,27,BLACK,colour,'A',0);
+		OutGraphicsCharFont1(624,27,BLACK,colour,'U',0);
+		OutGraphicsCharFont1(632,27,BLACK,colour,'T',0);
+		OutGraphicsCharFont1(640,27,BLACK,colour,'O',0);
+		break;
+
+	case(security_pressed):
+		rectangle(683,13,757,47,colour);
+		OutGraphicsCharFont1(692,27,BLACK,colour,'S',0);
+		OutGraphicsCharFont1(700,27,BLACK,colour,'E',0);
+		OutGraphicsCharFont1(708,27,BLACK,colour,'C',0);
+		OutGraphicsCharFont1(716,27,BLACK,colour,'U',0);
+		OutGraphicsCharFont1(724,27,BLACK,colour,'R',0);
+		OutGraphicsCharFont1(732,27,BLACK,colour,'I',0);
+		OutGraphicsCharFont1(740,27,BLACK,colour,'T',0);
+		OutGraphicsCharFont1(748,27,BLACK,colour,'Y',0);
+		break;
+
+	case(bluetooth_pressed):
+		circle(50,50,27,colour);
+
+		line(49,25,49,75,BLACK);
+		line(50,25,50,75,BLACK);
+		line(51,25,51,75,BLACK);
+
+		line(35,34,65,64,BLACK);
+		line(35,35,65,65,BLACK);
+		line(35,36,65,66,BLACK);
+
+		line(35,64,65,34,BLACK);
+		line(35,65,65,35,BLACK);
+		line(35,66,65,36,BLACK);
+
+		line(65,64,50,74,BLACK);
+		line(65,65,50,75,BLACK);
+		line(65,66,50,76,BLACK);
+
+		line(65,34,50,24,BLACK);
+		line(65,35,50,25,BLACK);
+		line(65,36,50,26,BLACK);
+		break;
+
+	case(up_pressed):
+		up_triangle(UARROW_X1 + 12,UARROW_Y1-6,ARROW_LENGTH - 24,colour);
+		break;
+
+	case(down_pressed):
+		down_triangle(DARROW_X1 + 12,DARROW_Y1+6,ARROW_LENGTH - 24,colour);
+		break;
+
+	case(left_pressed):
+		left_triangle(LARROW_X1 - 6,LARROW_Y1+12,ARROW_LENGTH - 24,colour);
+		break;
+
+	case(right_pressed):
+		right_triangle(RARROW_X1 + 6,RARROW_Y1+12,ARROW_LENGTH - 24,colour);
+		break;
+	}
+}
+
+/*
+ * subroutine to program a hardware (graphics chip) palette number with an RGB value
+ * e.g. program_palette(RED, 0x00FF0000) ;
+ *
+ */
+void program_palette(int PaletteNumber, uint32_t RGB)
+{
+    WAIT_FOR_GRAPHICS;
+    GraphicsColourReg = PaletteNumber;
+    GraphicsX1Reg = RGB >> 16   ;        // program red value in ls.8 bit of X1 reg
+    GraphicsY1Reg = RGB ;                // program green and blue into ls 16 bit of Y1 reg
+    GraphicsCommandReg = ProgramPaletteColour; // issue command
+}
+
+/*
+ * Clear the screen
+ */
+void clear_screen(void)
+{
+	int i;
+	for(i=0;i<480;i++){
+		line(0,i,799,i,BLACK);
+	}
+}
+
+/*
+ * Draw reticle to center of the screen
+ */
+void reticle(int colour)
+{
+	rectangle(398,150,402,330,colour);
+	rectangle(310,238,490,242,colour);
+	rectangle(340,272,460,274,colour);
+	rectangle(370,304,430,306,colour);
+}
+
+void write_processing_message(int colour)
+{
+	OutGraphicsCharFont2a(346,85,colour,BLACK,'P',0);
+	OutGraphicsCharFont2a(358,85,colour,BLACK,'R',0);
+	OutGraphicsCharFont2a(370,85,colour,BLACK,'O',0);
+	OutGraphicsCharFont2a(382,85,colour,BLACK,'C',0);
+	OutGraphicsCharFont2a(394,85,colour,BLACK,'E',0);
+	OutGraphicsCharFont2a(406,85,colour,BLACK,'S',0);
+	OutGraphicsCharFont2a(418,85,colour,BLACK,'S',0);
+	OutGraphicsCharFont2a(430,85,colour,BLACK,'I',0);
+	OutGraphicsCharFont2a(442,85,colour,BLACK,'N',0);
+	OutGraphicsCharFont2a(454,85,colour,BLACK,'G',0);
+}
+
+void erase_processing_message(void)
+{
+	rectangle(345,60,470,110,BLACK);
+}
+
+/*
+ * Draw set arrow layout with colour
+ */
+void print_display(int arrow_colour, int menu_colour, int screen_colour,
+				  int reticle_colour, int fire_colour, int camera_colour)
+{
+	clear_screen();
+	//rectangle(60,60,740,420,screen_colour);
+	//reticle(reticle_colour);
+
+	//MENU ICONS
+	draw_button(fire,fire_colour);
+	draw_button(camera,camera_colour);
+	draw_button(security,menu_colour);
+	draw_button(bluetooth,menu_colour);
+	draw_button(manual,menu_colour);
+	draw_button(automatic,menu_colour);
+	draw_button(left,arrow_colour);
+	draw_button(right,arrow_colour);
+	draw_button(up,arrow_colour);
+	draw_button(down,arrow_colour);
+}

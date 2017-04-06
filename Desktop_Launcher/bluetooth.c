@@ -147,4 +147,3 @@ int bluetooth_connected(void)
 
 	return result;
 }
-

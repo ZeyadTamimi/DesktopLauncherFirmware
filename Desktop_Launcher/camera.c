@@ -206,15 +206,11 @@ void cam_init(void)
     memset(camera_buffer, 0, CAMERA_BUFFER_SIZE +1);
     camera_reset();
 
-	printf(" Image Resolution was %d\n", get_image_resolution());
-    set_image_resolution(FRAME_320x240);
-	printf(" Image Resolution was %d\n", get_image_resolution());
-
 	cam_set_baud_115200();
 	set_device_baud(CAMERA, BAUD_115200);
 
     set_image_resolution(FRAME_320x240);
-	printf(" Image Resolution was %d\n", get_image_resolution());
+	printf(" Image Resolution is %d\n", get_image_resolution());
 }
 
 resolution get_image_resolution()
