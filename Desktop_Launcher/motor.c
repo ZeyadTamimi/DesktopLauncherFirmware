@@ -1,28 +1,29 @@
+//===================================================================
+// Includes
+//===================================================================
+// System Includes
 #include <assert.h>
-
-#include "motor.h"
 #include <unistd.h>
 #include <stdint.h>
+#include <stdio.h>
+// Project Includes
+#include "motor.h"
 
 //===================================================================
-// Memory Mapped Defines
+// Defines
 //===================================================================
+// Memory Mapped Locations
 #define PWM_CW180 (*((unsigned short*) 0x80000010)) // u/d GPIO 40
 #define PWM_CW360 (*((unsigned short*) 0x80000000)) // l/r GPIO 38
 #define PWM_CWFIRE (*((unsigned short*) 0x80000060)) // fire GPIO 36
 
-//===================================================================
-// Motor Limits
-//===================================================================
+// Motor Limits (2000-8000)
 #define kCW180_MAX 4900
 #define kCW180_MIN 2900
 #define kCW180_MID 3900
-//2000-8000
-
 #define kCWFIRE_MAX 5750
 #define kCWFIRE_MIN 2000
 #define kCWFIRE_MID 3000
-
 #define kRANGE360 32
 
 //===================================================================
@@ -40,33 +41,8 @@ int bluetooth_enabled = 0;
 int bluetooth_multiplier = 14;
 int up_multiplier = 1;
 int down_multiplier = 1;
-
 uint16_t kCW360_MID = 4113;
 
-//===================================================================
-// Private Function Definitions
-//===================================================================
-int motor_test()
-{
-	init_motors();
-	while (1)
-	{
-		/*
-		unsigned char c;
-		printf("enter: ");
-		scanf("%c", &c);
-		if (c == 'w') move_up();
-		else if (c == 'a') move_left();
-		*/
-
-		int pwm_counter;
-		printf("enter: ");
-		scanf("%d", &pwm_counter);
-		set_direct_PWM(2, pwm_counter);
-
-	}
-	return 0;
-}
 //===================================================================
 // Public Function Definitions
 //===================================================================
@@ -89,7 +65,7 @@ void init_motors(void)
 			move_leftright_angle(-45);
 			usleep(500000);
 			printf("enter delta: ");
-			scanf("%d", &d);
+			scanf("%hu", &d);
 			kCW360_MID -= d;
 			printf("new mid: %d\n", kCW360_MID);
     	}
@@ -228,11 +204,6 @@ void stop_leftrght(void)
     PWM_CW360 = kCW360_MID;
 }
 
-void motor_load(void)
-{
-    PWM_CWFIRE = kCWFIRE_MID;
-}
-
 void motor_fire(void)
 {
     PWM_CWFIRE = kCWFIRE_MAX;
@@ -250,7 +221,6 @@ int get_motor_speed()
 {
 	return leftright_speed;
 }
-
 
 // Use this to debug!
 void set_direct_PWM(int motor, int pwm_counter)

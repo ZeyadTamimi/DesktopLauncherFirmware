@@ -1,10 +1,3 @@
-/*
- * touch_screen.h
- *
- *  Created on: Jan 26, 2017
- *      Author: Zeyad
- */
-
 #ifndef TOUCH_SCREEN_H_
 #define TOUCH_SCREEN_H_
 
@@ -12,6 +5,7 @@
 // Defines
 //===================================================================
 #define INVALID_POINT_DATA -1
+
 //===================================================================
 // Public Data types
 //===================================================================
@@ -26,6 +20,5 @@ int init_touch(void);
 Point get_press(void);
 Point get_release(void);
 Point get_press_timeout(unsigned long timeout_usec);
-
 
 #endif /* TOUCH_SCREEN_H_ */

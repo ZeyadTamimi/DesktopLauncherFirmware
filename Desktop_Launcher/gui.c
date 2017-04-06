@@ -1,5 +1,3 @@
-
-
 //===================================================================
 // Includes
 //===================================================================
@@ -18,11 +16,9 @@
 #define TOGGLEABLE_BUTTON_NUMBER 3
 #define MODE_BUTTON_NUMBER 3
 
-
 //===================================================================
 // Private Types
 //===================================================================
-
 typedef struct Button {
 	int x0, y0;
 	int x1, y1;
@@ -34,7 +30,6 @@ typedef struct Button {
 	int toggled;
 	int disabled;
 } Button;
-
 
 //===================================================================
 // Global variables
@@ -63,8 +58,6 @@ int poll_touch(int timeout_usec)
 
         return -1;
     }
-    //touch_point = get_release();
-
 
     int button_index;
     for (button_index = 0; button_index < button_array_size; button_index++)
@@ -181,8 +174,8 @@ void process_user_input(int timeout_usec)
 void init_gui(){
 
     // Initialize all modules that are controlled by the GUI
-     init_palette();
-     init_touch();
+	init_palette();
+	init_touch();
 
     // Button initialization code
     Button manual_button;
@@ -194,7 +187,7 @@ void init_gui(){
     manual_button.normal_button_color = CYAN;
     manual_button.pressed_button_type = manual_pressed;
     manual_button.pressed_button_color = WHITE;
-    manual_button.toggled = 0;
+    manual_button.toggled = 1;
     manual_button.callback = NULL;
     manual_button.disabled = 0;
 
@@ -327,7 +320,7 @@ void init_gui(){
 	button_array[DOWN_BUTTON] = down_button;
 	button_array[CAMERA_BUTTON] = camera_button;
 
-    print_display(LIME,CYAN,WHITE,RED,RED, CYAN);
+    print_display(LIME,CYAN,WHITE,RED,RED,CYAN);
+    draw_button(manual_button.pressed_button_type,
+    		    manual_button.pressed_button_color);
 }
-
-

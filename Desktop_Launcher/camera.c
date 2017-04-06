@@ -75,7 +75,7 @@ void send_command(uint8_t cmd, uint8_t *command_args, uint8_t args_length)
  * \return This function returns the amount of bytes that it managed to read
  *         from the serial interface before the timeout.
  */
-uint8_t read_response(uint8_t numbytes, uint8_t timeout)
+uint8_t read_response(uint8_t numbytes)
 {
     // Ensure that we don't overrun the global recv buffer.
     assert(numbytes <= CAMERA_BUFFER_SIZE);
@@ -86,7 +86,7 @@ uint8_t read_response(uint8_t numbytes, uint8_t timeout)
     return buffer_length;
 }
 
-uint8_t rekt_read_response(uint8_t numbytes, unsigned long timeout)
+uint8_t read_response_timeout(uint8_t numbytes, unsigned long timeout)
 {
     // Ensure that we don't overrun the global recv buffer.
     assert(numbytes <= CAMERA_BUFFER_SIZE);
@@ -134,10 +134,10 @@ int run_command(uint8_t cmd, uint8_t *command_args, uint8_t command_arg_length,
                 uint8_t response_length, int flush_buffer)
 {
     if (flush_buffer)
-        read_response(CAMERA_BUFFER_SIZE, 10);
+        read_response(CAMERA_BUFFER_SIZE);
 
     send_command(cmd, command_args, command_arg_length);
-    uint8_t received_response_length = read_response(response_length, STD_WAIT);
+    uint8_t received_response_length = read_response(response_length);
     if (received_response_length != response_length)
         return 0;
 
@@ -145,7 +145,6 @@ int run_command(uint8_t cmd, uint8_t *command_args, uint8_t command_arg_length,
         return 0;
 
     return 1;
-
 }
 
 int camera_frame_buff_ctrl(uint8_t command)
@@ -186,7 +185,7 @@ char *cam_set_baud_115200()
 
 	send_command(COMMAND_SET_PORT, args, sizeof(args));
 	  // get reply
-	  if (!rekt_read_response(CAMERA_BUFFER_SIZE, 1000000))
+	  if (!read_response_timeout(CAMERA_BUFFER_SIZE, 1000000))
 	    return 0;
 
 	  camera_buffer[buffer_length] = 0;  // end it!
@@ -275,7 +274,7 @@ int get_motion_detect(void)
 
 int motion_detected(unsigned long timeout)
 {
-	if(rekt_read_response(4, timeout) != 4)
+	if(read_response_timeout(4, timeout) != 4)
 		return 0;
 
   if (! verify_response(COMMAND_MOTION_DETECTED))
@@ -294,7 +293,7 @@ uint8_t *read_picture(uint8_t n)
     if(!response)
         return 0;
 
-    response = read_response(n+5, CAMERADELAY);
+    response = read_response(n+5);
     //printf("THIS IS TILTING ME by requesting: %d, and getting %d\n", n+5, response);
     if(!response)
         return 0;

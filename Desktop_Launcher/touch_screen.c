@@ -1,10 +1,3 @@
-/*
- * touch_screen.c
- *
- *  Created on: Jan 26, 2017
- *      Author: Zeyad
- */
-
 //===================================================================
 // Includes
 //===================================================================
@@ -26,7 +19,6 @@
 // Conversion Factors
 #define X_CONVERSION_FACTOR 5.12
 #define Y_CONVERSION_FACTOR 8.53
-
 
 //===================================================================
 // Constants
@@ -60,7 +52,6 @@ int verify_touch_report(unsigned char * touch_report, int size)
     return 1;
 }
 
-
 //===================================================================
 // Public Function Definitions
 //===================================================================
@@ -79,13 +70,10 @@ int init_touch(void)
     return 1;
 }
 
-
 int ScreenTouched( void )
 {
     return test_for_received_data(CAMERA);
 }
-
-
 
 void WaitForTouch()
 {
@@ -122,7 +110,6 @@ Point get_press_timeout(unsigned long timeout_usec)
     // calibrated correctly so that it maps to a pixel on screen
     return press_point;
 }
-
 
 Point get_press(void)
 {
