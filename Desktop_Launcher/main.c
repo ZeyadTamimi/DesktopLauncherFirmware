@@ -1,3 +1,6 @@
+//===================================================================
+// Includes
+//===================================================================
 // System Includes
 #include <stdio.h>
 #include <stdlib.h>
@@ -16,6 +19,9 @@
 #include "bluetooth.h"
 #include "serial.h"
 
+//===================================================================
+// Defines
+//===================================================================
 // Enable Image Processing
 #define _NJ_INCLUDE_HEADER_ONLY
 
@@ -25,9 +31,6 @@
 #define AUTO_POLL 100000
 #define USER_POLL 50000
 #define BLUETOOTH_INITIAL_POLL 5000000
-
-// Text Message
-const char * motion_mesasge = "Someone is moving around!";
 
 typedef enum desktop_launcher_mode
 {
@@ -115,11 +118,7 @@ void bluetooth_callback(void)
 //===================================================================
 void security_mode(void)
 {
-	/**********************
-	 * CODE TO DISABLE BUTTONS/CALLBACKS
-	 * SEND SMS WITH TIME
-	 * SAVE PHOTO TO CLOUD
-	 **********************/
+
 	disable_button(UP_BUTTON);
 	disable_button(DOWN_BUTTON);
 	disable_button(LEFT_BUTTON);
@@ -128,12 +127,9 @@ void security_mode(void)
 	disable_button(CAMERA_BUTTON);
 
 	set_motion_detect(1);
-	if (get_motion_detect())
-		printf("ON\n");
-	  else
-		printf("OFF\n");
+	if (!get_motion_detect())
+		printf("Motion detect should be on\n");
 
-	set_motion_detect(1);
 	int motion = motion_detected(SECURITY_POLL);
 	if (motion)
 	{
@@ -162,10 +158,8 @@ void auto_mode(void)
 
 	// Check Motion
 	set_motion_detect(1);
-	if (get_motion_detect())
-		printf("ON\n");
-	  else
-		printf("OFF\n");
+	if (!get_motion_detect())
+		printf("Motion detect should be on\n");
 
 	process_user_input(AUTO_POLL);
 	int motion = motion_detected(2000000);
@@ -212,7 +206,7 @@ void disable_bluetooth(void)
 //===================================================================
 // Bluetooth Command Handlers
 //===================================================================
-uint8_t move_command_time(uint8_t *bluetooth_rx_message, uint16_t size)
+uint8_t command_move_time(uint8_t *bluetooth_rx_message, uint16_t size)
 {
 	// TODO Add size check
 	uint32_t wait_time = 0;
@@ -231,7 +225,7 @@ uint8_t move_command_time(uint8_t *bluetooth_rx_message, uint16_t size)
 	return RESPONSE_NO_ERROR;
 }
 
-uint8_t move_command_time_speed(uint8_t *bluetooth_rx_message, uint16_t size)
+uint8_t command_move_time_speed(uint8_t *bluetooth_rx_message, uint16_t size)
 {
 	// TODO Add size check
 	// Get the speed
@@ -260,7 +254,7 @@ uint8_t move_command_time_speed(uint8_t *bluetooth_rx_message, uint16_t size)
 	return RESPONSE_NO_ERROR;
 }
 
-uint8_t set_motor_speed_command(uint8_t *bluetooth_rx_message, uint16_t size)
+uint8_t command_set_motor_speed(uint8_t *bluetooth_rx_message, uint16_t size)
 {
 	// TODO Add size check
 	uint8_t new_speed = bluetooth_rx_message[SIZE_FIELD_HEADER];
@@ -270,7 +264,7 @@ uint8_t set_motor_speed_command(uint8_t *bluetooth_rx_message, uint16_t size)
 	return RESPONSE_NO_ERROR;
 }
 
-uint8_t move_command_angle(uint8_t *bluetooth_rx_message, uint16_t size)
+uint8_t command_move_angle(uint8_t *bluetooth_rx_message, uint16_t size)
 {
 	int8_t angle_x = bluetooth_rx_message[SIZE_FIELD_HEADER];
 	int8_t angle_y = bluetooth_rx_message[SIZE_FIELD_HEADER + SIZE_FIELD_COMMAND_MOVE_ANGLE_X];
@@ -311,7 +305,7 @@ void send_motion_report()
 	set_motion_detect(1);
 
 	if (!get_motion_detect())
-		printf("MOTION SHOULD BE ON\n");
+		printf("Motion detect should be on\n");
 
 	int detected = motion_detected(2000000);
 	set_motion_detect(0);
@@ -327,13 +321,13 @@ void handle_command(uint8_t *bluetooth_rx_message, uint16_t size)
 	switch (bluetooth_rx_message[0])
 	{
 		case ID_COMMAND_MOVE_TIME:
-			response_code = move_command_time(bluetooth_rx_message, size);
+			response_code = command_move_time(bluetooth_rx_message, size);
 			break;
 		case ID_COMMAND_MOVE_ANGLE:
-			response_code = move_command_angle(bluetooth_rx_message, size);
+			response_code = command_move_angle(bluetooth_rx_message, size);
 			break;
 		case ID_COMMAND_CHANGE_SPEED:
-			response_code = set_motor_speed_command(bluetooth_rx_message, size);
+			response_code = command_set_motor_speed(bluetooth_rx_message, size);
 			break;
 		case ID_COMMAND_FIRE:
 			motor_fire();
@@ -343,7 +337,7 @@ void handle_command(uint8_t *bluetooth_rx_message, uint16_t size)
 			response_code = RESPONSE_NIOS_HANDSHAKE;
 			break;
 		case ID_COMMAND_MOVE_TIME_SPEED:
-			response_code = move_command_time_speed(bluetooth_rx_message, size);
+			response_code = command_move_time_speed(bluetooth_rx_message, size);
 			break;
 		case ID_COMMAND_CHANGE_RES:
 			response_code = change_resolution(bluetooth_rx_message, size);
